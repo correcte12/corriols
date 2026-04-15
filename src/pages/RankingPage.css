@@ -1,0 +1,263 @@
+.ranking-page {
+  max-width: 780px;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #1a5c38;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+/* ── Títol ────────────────────────────────────────── */
+.ranking-title-row {
+  margin-bottom: 1.5rem;
+}
+
+.ranking-category {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #999;
+  margin: 0 0 0.25rem;
+}
+
+.ranking-title-row h1 {
+  font-size: 2rem;
+  margin: 0 0 0.35rem;
+}
+
+.ranking-subtitle {
+  color: #777;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* ── Stats ────────────────────────────────────────── */
+.ranking-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+/* ── Ranking card ─────────────────────────────────── */
+.ranking-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.ranking-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.25rem 1.25rem 0;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ranking-card-header h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.2rem;
+}
+
+.my-position {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0;
+}
+
+/* Líder */
+.leader-badge {
+  background: #f5f0e8;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  text-align: right;
+  min-width: 130px;
+}
+
+.leader-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #c49a3c;
+  margin-bottom: 0.2rem;
+}
+
+.leader-name {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.leader-count {
+  display: block;
+  font-size: 0.78rem;
+  color: #888;
+}
+
+/* Sort */
+.sort-row {
+  display: flex;
+  gap: 0.4rem;
+  padding: 1rem 1.25rem 0.75rem;
+}
+
+.sort-btn {
+  padding: 0.3rem 0.85rem;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: white;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.12s;
+}
+.sort-btn:hover  { border-color: #1a5c38; color: #1a5c38; }
+.sort-btn.active { background: #1a5c38; border-color: #1a5c38; color: white; }
+
+/* ── Taula ────────────────────────────────────────── */
+.ranking-table {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.ranking-thead,
+.ranking-row {
+  display: grid;
+  grid-template-columns: 3rem 1fr 5rem 6.5rem 6.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.5rem;
+}
+
+.ranking-thead {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #bbb;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ranking-row {
+  border-bottom: 1px solid #f7f7f7;
+  border-radius: 6px;
+  transition: background 0.1s;
+}
+.ranking-row:hover { background: #fafaf8; }
+.ranking-row:last-child { border-bottom: none; }
+
+.ranking-row.is-me {
+  background: #f0f8f4;
+}
+.ranking-row.is-me:hover { background: #e8f4ee; }
+
+/* Medalles */
+.col-pos { text-align: center; }
+
+.medal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.medal-1 { background: #fef3c7; color: #b45309; }
+.medal-2 { background: #f3f4f6; color: #6b7280; }
+.medal-3 { background: #fef0e7; color: #92400e; }
+
+.pos-num {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #666;
+}
+
+/* User */
+.col-user {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.rank-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.rank-avatar.placeholder {
+  background: #1a5c38;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.rank-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.you-tag {
+  font-weight: 400;
+  color: #1a5c38;
+  font-size: 0.8rem;
+}
+
+/* Stats columns */
+.col-stat {
+  font-size: 0.875rem;
+  color: #666;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.col-stat.active {
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.ranking-thead .col-stat.active {
+  color: #1a5c38;
+}
+
+.loading, .empty { color: #666; }

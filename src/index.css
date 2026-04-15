@@ -1,0 +1,16 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #edeae3;
+  color: #1a1a1a;
+}
+
+/* Scrollbar subtil */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #e4e0d8; }
+::-webkit-scrollbar-thumb { background: #b8b4aa; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9a9690; }

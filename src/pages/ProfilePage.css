@@ -1,0 +1,175 @@
+.profile-page {
+  max-width: 600px;
+}
+
+.profile-page h1 {
+  font-size: 1.75rem;
+  margin: 0 0 1.5rem;
+}
+
+.profile-form {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #444;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #1a5c38;
+}
+
+.btn-primary {
+  padding: 0.5rem 1.25rem;
+  background: #1a5c38;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-primary:hover { background: #154d2f; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.section-title {
+  font-size: 1.2rem;
+  margin: 0 0 1rem;
+}
+
+.empty, .loading {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.empty a { color: #1a5c38; }
+
+.profile-challenges {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-challenge-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: white;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  text-decoration: none;
+  color: inherit;
+}
+
+.profile-challenge-link:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.challenge-type {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #1a5c38;
+  font-weight: 600;
+  min-width: 80px;
+}
+
+/* Mapa de traçes */
+.profile-traces-section {
+  background: white;
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  margin-bottom: 2rem;
+  max-width: 100%;
+}
+
+.profile-page {
+  max-width: 700px;
+}
+
+.profile-traces-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.profile-traces-count {
+  font-size: 0.82rem;
+  color: #888;
+  margin: 0.2rem 0 0;
+}
+
+.btn-map-toggle-profile {
+  background: #eef6f0;
+  border: 1px solid #a8d5b5;
+  color: #1a5c38;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-map-toggle-profile:hover { background: #d8ede0; }
+
+.map-placeholder {
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0ec;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  color: #888;
+}
+
+.all-traces-map-wrap {
+  position: relative;
+}
+
+.all-traces-loading {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  background: white;
+  border-radius: 20px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.78rem;
+  color: #1a5c38;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}

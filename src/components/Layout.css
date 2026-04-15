@@ -1,0 +1,104 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 56px;
+  background: #1a5c38;
+  color: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+
+/* A la home: transparent sobre el hero */
+.navbar-transparent {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%);
+  box-shadow: none;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: white;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.navbar-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.navbar-icon-link {
+  display: flex;
+  align-items: center;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+.navbar-icon-link:hover { opacity: 1; }
+
+.navbar-social-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.navbar-links a {
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.navbar-links a:hover {
+  color: white;
+}
+
+.navbar-links button {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.85);
+  padding: 0.3rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.navbar-links button:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.main-content {
+  flex: 1;
+  padding: calc(56px + 2rem) 1.5rem 2rem;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* La home necessita ample complet sense padding (el hero ja fa d'espaiat) */
+.main-content.full-width {
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+}
