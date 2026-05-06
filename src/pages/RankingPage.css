@@ -261,3 +261,48 @@
 }
 
 .loading, .empty { color: #666; }
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 560px) {
+  .ranking-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  .stat-card {
+    padding: 0.75rem;
+  }
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  .stat-label {
+    font-size: 0.68rem;
+  }
+
+  /* Taula: Pos + User + 1 columna activa */
+  .ranking-thead,
+  .ranking-row {
+    grid-template-columns: 2.5rem 1fr 4rem;
+  }
+
+  /* Amaga les columnes no actives */
+  .col-stat:not(.active) {
+    display: none;
+  }
+
+  .ranking-card-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .leader-badge {
+    text-align: left;
+    width: 100%;
+  }
+
+  .rank-name {
+    font-size: 0.82rem;
+  }
+  .rank-avatar {
+    width: 28px;
+    height: 28px;
+  }
+}

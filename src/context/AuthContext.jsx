@@ -9,7 +9,10 @@ export function AuthProvider({ children }) {
 
   async function ensureProfile(user) {
     if (!user) return
-    await supabase.from('profiles').upsert({ id: user.id }, { onConflict: 'id' })
+    await supabase.from('profiles').upsert(
+      { id: user.id, email: user.email },
+      { onConflict: 'id' }
+    )
   }
 
   useEffect(() => {

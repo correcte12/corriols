@@ -37,7 +37,7 @@ export default function RankingPage() {
           .in('user_id', userIds),
         supabase
           .from('profiles')
-          .select('id, display_name, avatar_url')
+          .select('id, display_name, email, avatar_url')
           .in('id', userIds),
       ])
 
@@ -52,14 +52,20 @@ export default function RankingPage() {
       const profileMap = {}
       for (const p of profilesRes.data ?? []) profileMap[p.id] = p
 
-      const ranking = userIds.map(uid => ({
+      const ranking = userIds.map(uid => {
+        const profile = profileMap[uid]
+        const displayName =
+          profile?.display_name ||
+          (profile?.email ? profile.email.split('@')[0] : null) ||
+          'Usuari/a'
+        return {
         user_id:      uid,
-        display_name: profileMap[uid]?.display_name || 'Usuari/a',
-        avatar_url:   profileMap[uid]?.avatar_url,
+        display_name: displayName,
+        avatar_url:   profile?.avatar_url,
         count:        byUser[uid]?.count    ?? 0,
         distance:     byUser[uid]?.distance ?? 0,
         elevation:    byUser[uid]?.elevation ?? 0,
-      }))
+      }})
 
       setRows(ranking)
       setLoading(false)

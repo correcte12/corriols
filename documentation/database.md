@@ -13,6 +13,7 @@ Estén `auth.users` amb dades públiques. Es crea automàticament via trigger qu
 |---|---|---|
 | `id` | uuid PK | → `auth.users.id` |
 | `display_name` | text | |
+| `email` | text | Afegit migració 010 — per mostrar al rànquing si no hi ha display_name |
 | `bio` | text | |
 | `avatar_url` | text | |
 | `created_at` | timestamptz | |
@@ -124,6 +125,11 @@ Afegeix política RLS `UPDATE` a `user_progress` per al propietari.
 
 ### 009 — Camp `pdf_url` a `user_progress`
 Afegeix `pdf_url text` per guardar la URL signada del PDF de documentació de la ruta.
+
+### 010 — Camp `email` a `profiles`
+Afegeix `email text` a `profiles`. Actualitza el trigger `handle_new_user` per guardar l'email en el registre.
+Fa backfill dels usuaris existents des de `auth.users`.
+`AuthContext.ensureProfile` també passa l'email en cada login.
 
 ---
 

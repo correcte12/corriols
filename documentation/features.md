@@ -59,15 +59,20 @@ En clicar un cim: modal amb camps:
 - Ordenació per: Cims / Distància / Desnivell
 - Taula amb medalles (or/plata/bronze) per als top 3
 - Indicador "(tu)" per a l'usuari actual
+- **Nom d'usuari**: `display_name` → si buit, part del correu abans del `@` → si no hi ha correu, "Usuari/a"
+- **Mòbil**: en pantalla < 560px la taula mostra només Posició + Nom + la columna activa (les altres dues s'amaguen)
 - **Nota:** Supabase retorna `numeric` com a string → cal `parseFloat` / `parseInt`
 
 ---
 
 ## 5. Navbar i Layout
-- Navbar fixa (`position: fixed`, z-index 100, alçada 56px)
+- Navbar fixa (`position: fixed`, z-index 200, alçada 56px)
 - En ruta `/`: variant transparent (`navbar-transparent`) amb gradient fosc
 - Logo + text "Corriols de l'Empordà"
 - Links: Reptes, Galeria, El meu perfil (si autenticat), Admin (si autenticat), icones Wikiloc + Instagram
+- **Mòbil (< 640px)**: els links s'amaguen i apareix un botó hamburguesa (☰ / ✕ animat)
+  - Menú desplegable sota la navbar amb tots els links i icones socials
+  - Es tanca automàticament en navegar a qualsevol ruta
 - `main-content`: `padding-top: calc(56px + 2rem)`, max-width 900px
 - En ruta `/`: `full-width` (sense padding, sense max-width) per al hero
 

@@ -9,7 +9,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: 200;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -57,6 +57,7 @@
   object-fit: contain;
 }
 
+/* ── Desktop nav ── */
 .navbar-links {
   display: flex;
   align-items: center;
@@ -68,10 +69,7 @@
   text-decoration: none;
   font-size: 0.9rem;
 }
-
-.navbar-links a:hover {
-  color: white;
-}
+.navbar-links a:hover { color: white; }
 
 .navbar-links button {
   background: none;
@@ -82,12 +80,118 @@
   cursor: pointer;
   font-size: 0.9rem;
 }
-
 .navbar-links button:hover {
   background: rgba(255,255,255,0.1);
   color: white;
 }
 
+/* ── Hamburger button ── */
+.navbar-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  width: 36px;
+  height: 36px;
+}
+
+.navbar-hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: white;
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+  transform-origin: center;
+}
+
+/* Animació X quan obert */
+.navbar-hamburger.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.navbar-hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+.navbar-hamburger.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── Mobile menu ── */
+.mobile-menu {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  z-index: 190;
+  background: #1a5c38;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1.5rem 1.25rem;
+  gap: 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.mobile-menu--transparent {
+  background: rgba(0,0,0,0.85);
+}
+
+.mobile-menu a,
+.mobile-menu button {
+  display: block;
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+.mobile-menu a:last-child,
+.mobile-menu button:last-child {
+  border-bottom: none;
+}
+.mobile-menu a:hover,
+.mobile-menu button:hover {
+  color: white;
+}
+
+.mobile-menu-social {
+  display: flex;
+  gap: 1.5rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.mobile-menu-social a {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-bottom: none !important;
+  padding: 0 !important;
+  font-size: 0.9rem;
+  width: auto !important;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .navbar-links {
+    display: none;
+  }
+  .navbar-hamburger {
+    display: flex;
+  }
+}
+
+/* ── Main content ── */
 .main-content {
   flex: 1;
   padding: calc(56px + 2rem) 1.5rem 2rem;
