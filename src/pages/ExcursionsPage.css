@@ -1,0 +1,463 @@
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+.exc-app,
+.exc-login-wrap {
+  --exc-bg:      #0f172a;
+  --exc-surface: #1e293b;
+  --exc-border:  #334155;
+  --exc-accent:  #f97316;
+  --exc-text:    #f1f5f9;
+  --exc-muted:   #94a3b8;
+  --exc-green:   #22c55e;
+  --exc-red:     #ef4444;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--exc-text);
+}
+
+/* ── Login ────────────────────────────────────────────────────────────────── */
+.exc-login-wrap {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--exc-bg);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.exc-login-box {
+  background: var(--exc-surface);
+  border: 1px solid var(--exc-border);
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 360px;
+}
+
+.exc-login-title {
+  font-size: 1.5rem;
+  margin: 0 0 0.25rem;
+  color: var(--exc-accent);
+}
+
+.exc-login-sub {
+  color: var(--exc-muted);
+  font-size: 0.875rem;
+  margin: 0 0 1.75rem;
+}
+
+/* ── Forms ────────────────────────────────────────────────────────────────── */
+.exc-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--exc-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.exc-input,
+.exc-select {
+  background: var(--exc-bg);
+  border: 1px solid var(--exc-border);
+  border-radius: 6px;
+  color: var(--exc-text);
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.55rem 0.75rem;
+  outline: none;
+  width: 100%;
+}
+.exc-input:focus,
+.exc-select:focus {
+  border-color: var(--exc-accent);
+}
+
+/* ── App layout ───────────────────────────────────────────────────────────── */
+.exc-app {
+  background: var(--exc-bg);
+  border-radius: 12px;
+  min-height: 60vh;
+  padding: 1.5rem;
+}
+
+.exc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.exc-title {
+  font-size: 1.5rem;
+  margin: 0 0 0.2rem;
+  color: var(--exc-accent);
+}
+
+.exc-sub {
+  color: var(--exc-muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────────── */
+.exc-tabs {
+  display: flex;
+  gap: 0.4rem;
+  border-bottom: 1px solid var(--exc-border);
+  margin-bottom: 1.75rem;
+}
+
+.exc-tab {
+  background: none;
+  border: none;
+  color: var(--exc-muted);
+  font-family: inherit;
+  font-size: 0.875rem;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.12s;
+}
+.exc-tab:hover { color: var(--exc-text); }
+.exc-tab.active {
+  color: var(--exc-accent);
+  border-bottom-color: var(--exc-accent);
+  font-weight: 600;
+}
+
+/* ── Section titles ───────────────────────────────────────────────────────── */
+.exc-section-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--exc-muted);
+  margin-bottom: 0.875rem;
+}
+
+/* ── Saldo cards ──────────────────────────────────────────────────────────── */
+.exc-saldo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.6rem;
+}
+
+.exc-saldo-card {
+  background: var(--exc-surface);
+  border: 1px solid var(--exc-border);
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+}
+
+.exc-saldo-card.exc-saldo-me {
+  border-color: var(--exc-accent);
+}
+
+.exc-saldo-name {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--exc-muted);
+  margin-bottom: 0.35rem;
+}
+
+.exc-saldo-val {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--exc-text);
+}
+.exc-saldo-val.neg { color: var(--exc-red); }
+.exc-saldo-val.pos { color: var(--exc-green); }
+
+/* ── Suggested ────────────────────────────────────────────────────────────── */
+.exc-suggested {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.exc-suggested-badge {
+  background: var(--exc-accent);
+  color: white;
+  border-radius: 20px;
+  padding: 0.3rem 0.875rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.exc-suggested-hint {
+  font-size: 0.78rem;
+  color: var(--exc-muted);
+}
+
+/* ── Hist rows (dashboard) ────────────────────────────────────────────────── */
+.exc-hist-row {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--exc-border);
+  font-size: 0.875rem;
+}
+.exc-hist-row:last-child { border-bottom: none; }
+
+.exc-hist-date { color: var(--exc-muted); font-size: 0.8rem; flex-shrink: 0; }
+.exc-hist-dest { flex: 1; }
+.exc-hist-km   { color: var(--exc-accent); flex-shrink: 0; }
+
+/* ── Form (nova sortida) ──────────────────────────────────────────────────── */
+.exc-form {
+  max-width: 640px;
+}
+
+.exc-form-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 0.75rem;
+}
+.exc-form-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--exc-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.exc-form-row input {
+  background: var(--exc-surface);
+  border: 1px solid var(--exc-border);
+  border-radius: 6px;
+  color: var(--exc-text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.7rem;
+  outline: none;
+}
+.exc-form-row input:focus { border-color: var(--exc-accent); }
+
+/* Participants */
+.exc-participants {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.exc-participant-card {
+  background: var(--exc-surface);
+  border: 1px solid var(--exc-border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  transition: border-color 0.12s;
+}
+.exc-participant-card.cond { border-color: var(--exc-accent); }
+.exc-participant-card.pax  { border-color: #60a5fa; }
+
+.exc-p-name  { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.15rem; }
+.exc-p-seats { font-size: 0.72rem; color: var(--exc-muted); margin-bottom: 0.5rem; }
+
+.exc-p-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.exc-p-btn {
+  background: var(--exc-bg);
+  border: 1px solid var(--exc-border);
+  border-radius: 5px;
+  color: var(--exc-muted);
+  font-family: inherit;
+  font-size: 0.72rem;
+  padding: 0.3rem 0;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.exc-p-btn:hover { border-color: var(--exc-accent); color: var(--exc-accent); }
+.exc-p-btn.active {
+  background: var(--exc-accent);
+  border-color: var(--exc-accent);
+  color: white;
+  font-weight: 600;
+}
+
+/* Preview */
+.exc-preview {
+  background: var(--exc-surface);
+  border: 1px solid var(--exc-border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.82rem;
+  color: var(--exc-muted);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.exc-form textarea {
+  width: 100%;
+  background: var(--exc-surface);
+  border: 1px solid var(--exc-border);
+  border-radius: 6px;
+  color: var(--exc-text);
+  font-family: inherit;
+  font-size: 0.875rem;
+  padding: 0.6rem 0.75rem;
+  resize: vertical;
+  outline: none;
+  margin-top: 0.35rem;
+  box-sizing: border-box;
+}
+.exc-form textarea:focus { border-color: var(--exc-accent); }
+
+/* ── Historial ────────────────────────────────────────────────────────────── */
+.exc-hist-card {
+  background: var(--exc-surface);
+  border: 1px solid var(--exc-border);
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.exc-hist-card-top {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+
+.exc-hist-card .exc-hist-date { font-size: 0.78rem; }
+.exc-hist-card .exc-hist-dest { font-weight: 600; flex: 1; }
+.exc-hist-card .exc-hist-km   { font-weight: 600; }
+
+.exc-hist-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  color: var(--exc-muted);
+}
+
+.exc-hist-notes { font-style: italic; }
+
+.exc-hist-confirm {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.exc-hist-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.exc-btn-edit {
+  background: none;
+  border: 1px solid var(--exc-border);
+  border-radius: 5px;
+  color: var(--exc-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.1rem 0.45rem;
+  line-height: 1.4;
+  transition: all 0.1s;
+}
+.exc-btn-edit:hover {
+  border-color: var(--exc-accent);
+  color: var(--exc-accent);
+}
+
+.exc-hist-card--editing {
+  border-color: var(--exc-accent);
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+.exc-btn-primary {
+  background: var(--exc-accent);
+  border: none;
+  border-radius: 7px;
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  padding: 0.65rem 1.5rem;
+  transition: opacity 0.12s;
+}
+.exc-btn-primary:hover    { opacity: 0.88; }
+.exc-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.exc-btn-logout {
+  background: none;
+  border: 1px solid var(--exc-border);
+  border-radius: 6px;
+  color: var(--exc-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.875rem;
+}
+.exc-btn-logout:hover { border-color: var(--exc-muted); color: var(--exc-text); }
+
+.exc-btn-delete {
+  background: none;
+  border: none;
+  color: var(--exc-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0 0.3rem;
+  margin-left: auto;
+}
+.exc-btn-delete:hover { color: var(--exc-red); }
+
+.exc-btn-danger {
+  background: var(--exc-red);
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  padding: 0.25rem 0.6rem;
+}
+
+.exc-btn-cancel {
+  background: none;
+  border: 1px solid var(--exc-border);
+  border-radius: 5px;
+  color: var(--exc-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  padding: 0.25rem 0.6rem;
+}
+
+/* ── States ───────────────────────────────────────────────────────────────── */
+.exc-error   { color: var(--exc-red);   font-size: 0.82rem; margin: 0.5rem 0; }
+.exc-loading { color: var(--exc-muted); font-size: 0.875rem; }
+.exc-empty   { color: var(--exc-muted); font-size: 0.875rem; }
+
+/* ── Mobile ───────────────────────────────────────────────────────────────── */
+@media (max-width: 520px) {
+  .exc-form-row {
+    grid-template-columns: 1fr;
+  }
+  .exc-saldo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .exc-tabs {
+    overflow-x: auto;
+    gap: 0;
+  }
+  .exc-tab {
+    padding: 0.6rem 0.75rem;
+    white-space: nowrap;
+  }
+}

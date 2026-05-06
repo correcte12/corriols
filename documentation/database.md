@@ -87,6 +87,22 @@ Cada ítem completat per un usuari. Unique `(user_id, challenge_item_id)`.
 
 ---
 
+### `grup_excursions`
+Sortides del grup de dijous. Gestió de rotació de vehicles.
+
+| Columna | Tipus | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `data` | date | Data de la sortida |
+| `destino` | text | Nom del destí |
+| `km` | numeric(8,2) | Km anada+tornada |
+| `conductors` | text[] | Array d'IDs d'usuari (hardcodejats) |
+| `passatgers` | text[] | Array d'IDs d'usuari |
+| `notes` | text | Comentaris opcionals |
+| `created_at` | timestamptz | |
+
+---
+
 ## Migracions
 
 ### 001 — Esquema base + RLS
@@ -125,6 +141,11 @@ Afegeix política RLS `UPDATE` a `user_progress` per al propietari.
 
 ### 009 — Camp `pdf_url` a `user_progress`
 Afegeix `pdf_url text` per guardar la URL signada del PDF de documentació de la ruta.
+
+### 011 — Taula `grup_excursions`
+Crea la taula per al seguiment de sortides del grup de dijous.
+Camps: `id`, `data`, `destino`, `km`, `conductors` (text[]), `passatgers` (text[]), `notes`, `created_at`.
+RLS: lectura, inserció, actualització i eliminació obertes (autenticació gestionada a nivell d'app).
 
 ### 010 — Camp `email` a `profiles`
 Afegeix `email text` a `profiles`. Actualitza el trigger `handle_new_user` per guardar l'email en el registre.

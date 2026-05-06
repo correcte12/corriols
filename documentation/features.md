@@ -148,3 +148,31 @@ Peu de pàgina en gradient verd fosc (#2f5d50 → #1e3d34), 3 columnes:
 - En desar, es puja a `galeriamont/pdf/{userId}/{itemId}.pdf` i es guarda la URL a `user_progress.pdf_url`
 - Si ja hi ha un PDF pujat, apareix el botó "Obrir PDF" que l'obre en una pestanya nova
 - Un nou PDF substitueix l'anterior (upsert a Storage)
+
+---
+
+## 10. Dijous d'Excursió (`/excursions`)
+
+Secció independent per fer el seguiment de la rotació de vehicles del grup de dijous.
+
+### Autenticació pròpia
+- Login simple: dropdown amb 6 usuaris hardcodejats + contrasenya comuna `jueves25`
+- Sessió guardada a `sessionStorage` (no usa Supabase Auth)
+- Usuaris: Carlos M. (4 places), Carlos J. (4), Antonio (4), Diego (4), Luis P. (3), Juanito G. (4)
+
+### Lògica de saldos (km·passatger)
+- Cada sortida registra conductors i passatgers
+- El conductor "gasta" capacitat·km; el passatger "deu" km
+- `calcularSaldos()` acumula el balanç per a cada usuari
+- `designarConductors()` suggereix els 2 amb el saldo més negatiu per a la propera sortida
+
+### Pestanyes
+- **Dashboard**: saldos actuals de tots els usuaris (ressaltat el propi), conductors suggerits per la pròxima sortida, últimes 5 sortides
+- **Nova sortida**: formulari amb data, destí, km i toggle conductor/passatger per a cada usuari
+- **Historial**: llista completa de sortides amb edició inline (botó ✎) i eliminació amb confirmació
+
+### Infraestructura
+- Taula Supabase: `grup_excursions` (migració 011)
+- `src/pages/ExcursionsPage.jsx` + `ExcursionsPage.css`
+- Tema fosc (base `#0f172a`, accent taronja `#f97316`, font Georgia)
+- Responsive: grid adaptatiu, tabs amb scroll horitzontal en mòbil

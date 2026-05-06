@@ -9,6 +9,7 @@ import ProfilePage from './pages/ProfilePage'
 import AdminPage from './pages/AdminPage'
 import GalleryPage from './pages/GalleryPage'
 import GalleryAdminPage from './pages/GalleryAdminPage'
+import ExcursionsPage from './pages/ExcursionsPage'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
             <Route path="/galeria" element={<GalleryPage />} />
             <Route path="/galeria/:albumSlug" element={<GalleryPage />} />
             <Route path="/admin/galeria" element={<GalleryAdminPage />} />
+            <Route path="/excursions" element={<ExcursionsPage />} />
           </Routes>
         </Layout>
       </BrowserRouter>
