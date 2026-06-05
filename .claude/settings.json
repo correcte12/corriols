@@ -3,7 +3,23 @@
     "allow": [
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\mores\\\\Documents\\\\github\\\\corriols\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(grep -E \"\\\\.jsx$\")",
+      "Bash(npx vite *)",
+      "Bash(curl -s \"https://api.open-topo-data.com/v1/srtm30m?locations=42.25,3.0\")",
+      "Bash(curl -v \"https://api.open-topo-data.com/v1/srtm30m?locations=42.25,3.0\")",
+      "Bash(curl -s \"https://api.opentopodata.org/v1/srtm30m?locations=42.25,3.0\")",
+      "Bash(curl -s --max-time 10 \"https://open.mapquestapi.com/elevation/v1/profile?key=open&shapeFormat=raw&latLngCollection=42.25,3.0\")",
+      "PowerShell(npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image dompurify)",
+      "PowerShell(npm run build)",
+      "PowerShell(node -e \"for \\(const p of ['@tiptap/react','@tiptap/core','@tiptap/starter-kit','@tiptap/extension-image']\\) { try { console.log\\(p, require\\(p+'/package.json'\\).version\\) } catch\\(e\\){ console.log\\(p,'??'\\) } }\")",
+      "Bash(node -e ' *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\mores\\.claude\\projects\\c--Users-mores-Documents-github-corriols\\memory"
     ]
   }
 }

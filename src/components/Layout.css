@@ -206,3 +206,12 @@
   padding: 0;
   margin: 0;
 }
+
+/* Eines GPX: ample complet sota el navbar, sense padding ni restriccions */
+.main-content.gpx-layout {
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+  margin-top: 56px;
+  overflow: hidden;
+}

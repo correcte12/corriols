@@ -89,3 +89,78 @@ export const loadGpxFromUrl = async (url) => {
   const text = await res.text()
   return parseGpxToLatLngs(text)
 }
+
+/**
+ * Calcula estadístiques completes a partir d'un array de punts { lat, lon, ele }.
+ * Reutilitzable per recalcular stats després d'editar punts.
+ */
+export const calcStatsFromPoints = (points) => {
+  const THRESHOLD = 2
+  let distanceKm = 0
+  let elevationGain = 0
+  let elevationLoss = 0
+  let maxElevation = -Infinity
+  let minElevation = Infinity
+
+  for (let i = 0; i < points.length; i++) {
+    if (i > 0) {
+      distanceKm += haversine([points[i - 1].lat, points[i - 1].lon], [points[i].lat, points[i].lon])
+      if (points[i].ele !== null && points[i - 1].ele !== null) {
+        const diff = points[i].ele - points[i - 1].ele
+        if (diff > THRESHOLD) elevationGain += diff
+        else if (diff < -THRESHOLD) elevationLoss += Math.abs(diff)
+      }
+    }
+    if (points[i].ele !== null) {
+      if (points[i].ele > maxElevation) maxElevation = points[i].ele
+      if (points[i].ele < minElevation) minElevation = points[i].ele
+    }
+  }
+
+  return {
+    distanceKm: Math.round(distanceKm * 10) / 10,
+    elevationGain: Math.round(elevationGain),
+    elevationLoss: Math.round(elevationLoss),
+    maxElevation: maxElevation === -Infinity ? null : Math.round(maxElevation),
+    minElevation: minElevation === Infinity ? null : Math.round(minElevation),
+    pointCount: points.length,
+  }
+}
+
+/**
+ * Parseja un GPX retornant tots els punts amb elevació i temps, més estadístiques completes.
+ * Més complet que parseGpxStats: inclou elevationLoss, minElevation, maxElevation i temps per punt.
+ */
+export const parseGpxFull = (gpxText) => {
+  const parser = new DOMParser()
+  const xml = parser.parseFromString(gpxText, 'text/xml')
+
+  const parseError = xml.querySelector('parsererror')
+  if (parseError) throw new Error('Format GPX no vàlid')
+
+  const trkpts = xml.querySelectorAll('trkpt')
+  if (trkpts.length === 0) throw new Error('El fitxer GPX no conté punts de traça (trkpt)')
+
+  const points = Array.from(trkpts).map((pt) => {
+    const lat = parseFloat(pt.getAttribute('lat'))
+    const lon = parseFloat(pt.getAttribute('lon'))
+    const eleEl = pt.querySelector('ele')
+    const timeEl = pt.querySelector('time')
+    return {
+      lat,
+      lon,
+      ele: eleEl ? parseFloat(eleEl.textContent) : null,
+      time: timeEl ? new Date(timeEl.textContent) : null,
+    }
+  }).filter(p => !isNaN(p.lat) && !isNaN(p.lon))
+
+  const metaNameEl = xml.querySelector('metadata name')
+  const trkNameEl = xml.querySelector('trk name')
+  const name = metaNameEl?.textContent || trkNameEl?.textContent || 'Ruta sense nom'
+
+  const latLngs = points.map(p => [p.lat, p.lon])
+  const stats = calcStatsFromPoints(points)
+  const bounds = getBoundsFromLatLngs(latLngs)
+
+  return { name, points, latLngs, stats, bounds }
+}

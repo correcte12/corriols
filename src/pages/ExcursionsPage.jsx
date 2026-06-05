@@ -46,38 +46,70 @@ function calcularSaldos(excursions) {
   for (const exc of excursions) {
     const conductors = exc.conductors ?? []
     const passatgers = exc.passatgers ?? []
-    const kmTotal    = parseFloat(exc.km) || 0
+    const km         = parseFloat(exc.km) || 0
     if (conductors.length === 0) continue
 
-    const totalPersones = conductors.length + passatgers.length
-    const kmPerPersona  = kmTotal / (totalPersones || 1)
+    // Cada conductor guanya km × nombre de passatgers que porta al cotxe.
+    // Si hi ha un sol conductor, porta tots els passatgers.
+    // Cada assistent (conductor o passatger) es descompta km.
+    const tots = [...conductors, ...passatgers]
 
-    for (const uid of conductors) {
-      if (saldos[uid] === undefined) continue
-      const asientos  = USER_MAP[uid]?.asientos ?? 4
-      const capacitat = Math.min(asientos - 1, passatgers.length)
-      saldos[uid] -= kmPerPersona * capacitat
+    if (conductors.length === 1) {
+      const cid = conductors[0]
+      if (saldos[cid] !== undefined) saldos[cid] += km * passatgers.length
+    } else {
+      // Repartiment equitatiu de passatgers entre conductors
+      const paxPerCond = Math.floor(passatgers.length / conductors.length)
+      const extra      = passatgers.length % conductors.length
+      conductors.forEach((cid, i) => {
+        if (saldos[cid] === undefined) return
+        saldos[cid] += km * (paxPerCond + (i < extra ? 1 : 0))
+      })
     }
-    for (const uid of passatgers) {
-      if (saldos[uid] === undefined) continue
-      saldos[uid] += kmPerPersona
+
+    for (const uid of tots) {
+      if (saldos[uid] !== undefined) saldos[uid] -= km
     }
   }
 
   return saldos
 }
 
-function designarConductors(saldos, numConductors = 2) {
+function calcularAsistencies(excursions) {
+  const asistencies = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
+  for (const exc of excursions) {
+    const tots = [...(exc.conductors ?? []), ...(exc.passatgers ?? [])]
+    for (const uid of tots) {
+      if (asistencies[uid] !== undefined) asistencies[uid]++
+    }
+  }
+  return asistencies
+}
+
+function calcularRatios(saldos, asistencies) {
+  return Object.fromEntries(
+    USUARIOS.map(u => {
+      const n = asistencies[u.id] || 0
+      return [u.id, n > 0 ? saldos[u.id] / n : 0]
+    })
+  )
+}
+
+function designarConductors(saldos, asistencies, numConductors = 2) {
   return USUARIOS
     .slice()
-    .sort((a, b) => saldos[a.id] - saldos[b.id])
+    .sort((a, b) => {
+      const rA = asistencies[a.id] > 0 ? saldos[a.id] / asistencies[a.id] : 0
+      const rB = asistencies[b.id] > 0 ? saldos[b.id] / asistencies[b.id] : 0
+      return rA - rB
+    })
     .slice(0, numConductors)
     .map(u => u.id)
 }
 
 // ─── Vistes ───────────────────────────────────────────────────────────────────
-function Dashboard({ excursions, saldos, currentUser }) {
-  const suggested = designarConductors(saldos, 2)
+function Dashboard({ excursions, saldos, asistencies, ratios, currentUser }) {
+  const suggested = designarConductors(saldos, asistencies, 2)
 
   return (
     <div className="exc-dashboard">
@@ -85,11 +117,16 @@ function Dashboard({ excursions, saldos, currentUser }) {
       <div className="exc-saldo-grid">
         {USUARIOS.map(u => {
           const s = saldos[u.id]
+          const r = ratios[u.id]
+          const n = asistencies[u.id]
           return (
             <div key={u.id} className={`exc-saldo-card ${u.id === currentUser ? 'exc-saldo-me' : ''}`}>
               <span className="exc-saldo-name">{u.nombre}</span>
               <span className={`exc-saldo-val ${s < 0 ? 'neg' : s > 0 ? 'pos' : ''}`}>
-                {s > 0 ? '+' : ''}{s.toFixed(1)} km·p
+                {s > 0 ? '+' : ''}{s.toFixed(0)} km·p
+              </span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--exc-muted)', marginTop: 2 }}>
+                {n} sortides · ràtio {r > 0 ? '+' : ''}{r.toFixed(1)}
               </span>
             </div>
           )
@@ -101,7 +138,7 @@ function Dashboard({ excursions, saldos, currentUser }) {
         {suggested.map(uid => (
           <span key={uid} className="exc-suggested-badge">{USER_MAP[uid]?.nombre}</span>
         ))}
-        <span className="exc-suggested-hint">(menys km·passatger acumulats)</span>
+        <span className="exc-suggested-hint">(ràtio km·p / sortides més baix)</span>
       </div>
 
       <div className="exc-section-title" style={{ marginTop: '2rem' }}>
@@ -409,7 +446,9 @@ export default function ExcursionsPage() {
   const [loading,    setLoading]    = useState(false)
   const [view,       setView]       = useState('Dashboard')
 
-  const saldos = useMemo(() => calcularSaldos(excursions), [excursions])
+  const saldos     = useMemo(() => calcularSaldos(excursions),                [excursions])
+  const asistencies = useMemo(() => calcularAsistencies(excursions),           [excursions])
+  const ratios      = useMemo(() => calcularRatios(saldos, asistencies),       [saldos, asistencies])
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -495,7 +534,7 @@ export default function ExcursionsPage() {
 
       <div className="exc-content">
         {loading && <p className="exc-loading">Carregant...</p>}
-        {!loading && view === 'Dashboard'    && <Dashboard excursions={excursions} saldos={saldos} currentUser={loggedUser} />}
+        {!loading && view === 'Dashboard'    && <Dashboard excursions={excursions} saldos={saldos} asistencies={asistencies} ratios={ratios} currentUser={loggedUser} />}
         {!loading && view === 'Nova sortida' && <NouaExcursio onSaved={loadData} />}
         {!loading && view === 'Historial'    && <Historial excursions={excursions} onDelete={handleDelete} onSaved={loadData} />}
       </div>

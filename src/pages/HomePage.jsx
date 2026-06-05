@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import BlogCarousel from '../components/blog/BlogCarousel'
 import './HomePage.css'
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=80'
@@ -156,6 +157,9 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      {/* Últims articles del blog */}
+      <BlogCarousel />
     </div>
   )
 }

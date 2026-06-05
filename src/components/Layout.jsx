@@ -9,6 +9,7 @@ export default function Layout({ children }) {
   const navigate = useNavigate()
   const location = useLocation()
   const isHome = location.pathname === '/'
+  const isGpx = location.pathname.startsWith('/gpx')
   const [menuOpen, setMenuOpen] = useState(false)
 
   // Tanca el menú en canviar de ruta
@@ -34,7 +35,9 @@ export default function Layout({ children }) {
           <Link to="/">Reptes</Link>
           <Link to="/galeria">Galeria</Link>
           <Link to="/excursions">Excursions</Link>
+          <Link to="/blog">Blog</Link>
           {user && <Link to="/perfil">El meu perfil</Link>}
+          {user && <Link to="/gpx">Eines GPX</Link>}
           {user && <Link to="/admin">Admin</Link>}
           <a href="https://ca.wikiloc.com/wikiloc/user.do?id=68131" target="_blank" rel="noopener noreferrer" className="navbar-icon-link">
             <img src="/wikiloc-icon.png" alt="Wikiloc" className="navbar-social-icon" />
@@ -64,7 +67,9 @@ export default function Layout({ children }) {
           <Link to="/">Reptes</Link>
           <Link to="/galeria">Galeria</Link>
           <Link to="/excursions">Excursions</Link>
+          <Link to="/blog">Blog</Link>
           {user && <Link to="/perfil">El meu perfil</Link>}
+          {user && <Link to="/gpx">Eines GPX</Link>}
           {user && <Link to="/admin">Admin</Link>}
           <div className="mobile-menu-social">
             <a href="https://ca.wikiloc.com/wikiloc/user.do?id=68131" target="_blank" rel="noopener noreferrer">
@@ -83,10 +88,10 @@ export default function Layout({ children }) {
         </nav>
       )}
 
-      <main className={`main-content${isHome ? ' full-width' : ''}`}>
+      <main className={`main-content${isHome ? ' full-width' : ''}${isGpx ? ' gpx-layout' : ''}`}>
         {children}
       </main>
-      <Footer />
+      {!isGpx && <Footer />}
     </div>
   )
 }

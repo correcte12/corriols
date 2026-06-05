@@ -10,11 +10,18 @@ import AdminPage from './pages/AdminPage'
 import GalleryPage from './pages/GalleryPage'
 import GalleryAdminPage from './pages/GalleryAdminPage'
 import ExcursionsPage from './pages/ExcursionsPage'
+import GpxToolPage from './pages/GpxToolPage'
+import GpxEditPage from './pages/GpxEditPage'
+import BlogPage from './pages/BlogPage'
+import ArticlePage from './pages/ArticlePage'
+import BlogAdminPage from './pages/BlogAdminPage'
+import { GpxSessionProvider } from './hooks/useGpxSession.jsx'
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <GpxSessionProvider>
         <Layout>
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -27,8 +34,14 @@ export default function App() {
             <Route path="/galeria/:albumSlug" element={<GalleryPage />} />
             <Route path="/admin/galeria" element={<GalleryAdminPage />} />
             <Route path="/excursions" element={<ExcursionsPage />} />
+            <Route path="/gpx" element={<GpxToolPage />} />
+            <Route path="/gpx/editar/:id" element={<GpxEditPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<ArticlePage />} />
+            <Route path="/admin/blog" element={<BlogAdminPage />} />
           </Routes>
         </Layout>
+        </GpxSessionProvider>
       </BrowserRouter>
     </AuthProvider>
   )
