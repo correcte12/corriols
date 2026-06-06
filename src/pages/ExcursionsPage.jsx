@@ -424,6 +424,18 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
                   <div className="exc-p-saldo-line">Impacte: <strong>{impacte > 0 ? '+' : ''}{impacte.toFixed(0)}</strong> km·pas</div>
                   <div className="exc-p-saldo-line">Final: <strong>{saldoFinal > 0 ? '+' : ''}{saldoFinal.toFixed(0)}</strong> km·pas</div>
                 </div>
+                <div className="exc-p-calc-help">
+                  <div className="exc-p-calc-title">Fórmula:</div>
+                  {isCond && (
+                    <div className="exc-p-calc-line">Conductor: <strong>+(km × pax) − km</strong></div>
+                  )}
+                  {isPax && (
+                    <div className="exc-p-calc-line">Passatger: <strong>−km</strong></div>
+                  )}
+                  {!isCond && !isPax && (
+                    <div className="exc-p-calc-line" style={{ color: 'var(--exc-muted)' }}>No participant</div>
+                  )}
+                </div>
                 <div className="exc-p-btns">
                   <button type="button" className={`exc-p-btn ${isCond ? 'active' : ''}`}
                     onClick={() => toggleArray('conductors', u.id)}>Condueix</button>
