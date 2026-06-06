@@ -120,7 +120,7 @@ export default function ProfilePage() {
       <ul className="profile-challenges">
         {challenges.map(row => (
           <li key={row.challenge_id}>
-            <Link to={`/reto/${row.challenge_id}`} className="profile-challenge-link">
+            <Link to={`/reto/${row.challenge_id}?myOnly=true`} className="profile-challenge-link">
               <span className="challenge-type">{row.challenges?.type}</span>
               <strong>{row.challenges?.name}</strong>
             </Link>

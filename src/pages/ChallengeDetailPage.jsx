@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, lazy, Suspense } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import ProgressModal from '../components/ProgressModal'
@@ -27,6 +27,7 @@ function applyHeightFilter(items, filter) {
 export default function ChallengeDetailPage() {
   const { id } = useParams()
   const { user } = useAuth()
+  const [searchParams] = useSearchParams()
 
   const [challenge, setChallenge] = useState(null)
   const [items, setItems] = useState([])
@@ -39,11 +40,11 @@ export default function ChallengeDetailPage() {
   const [showMap, setShowMap] = useState(false)
   const [modalItem, setModalItem] = useState(null)
 
-  // Filtres
+  // Filtres — si vens de /perfil amb ?myOnly=true, empieza amb onlyDone=true
   const [search, setSearch] = useState('')
   const [heightFilter, setHeightFilter] = useState('all')
   const [onlyEssential, setOnlyEssential] = useState(false)
-  const [onlyDone, setOnlyDone] = useState(false)
+  const [onlyDone, setOnlyDone] = useState(searchParams.get('myOnly') === 'true')
 
   useEffect(() => {
     async function fetchData() {

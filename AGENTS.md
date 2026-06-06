@@ -146,3 +146,4 @@ npm run preview
 | Fecha | Resumen |
 |---|---|
 | 2026-04-15 | Definición del alcance completo, decisiones técnicas, creación del repo |
+| 2026-06-05 | **Módulo Blog** (`/blog`, `/blog/:slug`, `/admin/blog`): blog nativo sobre Supabase (tabla `articles` + bucket `blog`), editor WYSIWYG Tiptap v3 con limpiador de pegado de Facebook (emojis-imagen → carácter, listas con `data-marker`), crédito al autor original, fecha de publicación editable, portada sin pixelado, blog en 3 columnas y carrusel de los últimos 3 artículos en la portada. Ver detalle en `SPEC.md`. |

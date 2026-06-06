@@ -206,6 +206,85 @@ Per importar moviments existents: CSV o JSON amb els camps anteriors. Els IDs de
 
 ---
 
+## Mòdul Blog (`/blog`)
+
+Blog **natiu** integrat a corriols (no WordPress). Pensat per publicar articles útils per al grup (sovint adaptats de publicacions de Facebook, amb permís i crèdit a l'autor original). Decisió presa amb l'usuari: blog propi sobre Supabase reaprofitant l'auth, la BD i el Storage existents, en lloc d'afegir un segon sistema (WordPress).
+
+### Rutes
+
+```jsx
+<Route path="/blog" element={<BlogPage />} />            // llista pública (3 columnes)
+<Route path="/blog/:slug" element={<ArticlePage />} />   // article públic
+<Route path="/admin/blog" element={<BlogAdminPage />} /> // gestió (protegit per login)
+```
+
+`/admin/blog` redirigeix a `/login` si no hi ha sessió (mateix patró que la resta). Enllaç **"Blog"** públic a la navbar.
+
+### Base de dades — taula `articles` (Supabase)
+
+```sql
+create table articles (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  slug text unique not null,
+  excerpt text,
+  body text not null,                 -- HTML net de l'editor
+  cover_url text,
+  original_author text,               -- autor original (Facebook)
+  source_url text,                    -- enllaç a la publicació original
+  published boolean default false,
+  published_at timestamptz default now(),  -- data editable (mostrada i ordre)
+  author_id uuid references profiles(id),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table articles enable row level security;
+create policy "public read published" on articles for select using (published = true);
+create policy "auth manage" on articles for all
+  using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+```
+
+**Storage:** bucket `blog` (públic) per a portades i imatges del cos. Polítiques: `insert/update/delete` per a `authenticated`, `select` per a `public`. Nom configurable amb `VITE_SUPABASE_BLOG_BUCKET` (per defecte `blog`).
+
+### Editor (Tiptap v3)
+
+`src/components/blog/ArticleEditor.jsx` — WYSIWYG amb StarterKit + Image. Emet HTML; es renderitza amb **DOMPurify**.
+
+> ⚠️ Tiptap **v3**: `setContent(content, { emitUpdate: true })` (NO la signatura v2 `setContent(content, true)`).
+
+**Netejador de pegat de Facebook** (`cleanPastedHtml`) — la part més iterada. Facebook embolcalla cada línia en **divs imbricats** (`<div><div dir="auto">…</div></div>`) i posa les icones com a **emojis-imatge** (`<img src=".../emoji.php/.../2714.png">`), sovint amb `alt` buit. Estratègia robusta:
+
+1. **`extractLines()`** recorre qualsevol estructura HTML i n'extreu les línies de text (cada bloc i `<br>` trenca línia), convertint els emojis-imatge al seu caràcter.
+2. **`emojiFromImg()`**: usa l'`alt`; si falta, reconstrueix el caràcter des del codi del nom de fitxer de FB (`2714.png` → ✔, `274c.png` → ❌, `26a1.png` → ⚡).
+3. Reconstrueix `<p>` nets: línies de guions → `<hr>`; emoji en línia pròpia → es fusiona amb el text següent; línies que comencen per `✔ ❌ •…` es marquen amb `data-marker` per indentar-les com a ítems de llista mantenint el símbol.
+
+El `data-marker` als paràgrafs sobreviu al desar/recarregar gràcies a una extensió `MarkerParagraph` (Tiptap esborra classes/atributs no declarats). Hi ha un botó manual **🧹** que aplica el netejador sobre el contingut actual (i recupera el cas d'HTML enganxat com a text literal).
+
+*Compromís:* el netejador reconstrueix des del text, així que **es perd negreta/cursiva** del pegat (els posts de FB gairebé mai en porten); es pot reaplicar amb la barra d'eines.
+
+### Pàgines
+
+| Fitxer | Funció |
+|--------|--------|
+| `src/lib/blogStorage.js` | CRUD (`listArticles`, `getArticleBySlug/ById`, `create/update/deleteArticle`, `setArticlePublished`), slugs únics, `uploadBlogImage` |
+| `src/pages/BlogPage.jsx` | Llista pública en graella de **3 columnes** (2 a ≤900px, 1 a ≤600px) |
+| `src/pages/ArticlePage.jsx` | Article + crèdit a l'autor original; portada que **no s'amplia mai** (`max-height: 420px`, `width:auto`) per evitar pixelació d'imatges de baixa resolució |
+| `src/pages/BlogAdminPage.jsx` | Vista llista + editor a amplada completa (estil WordPress): títol gran, contingut, i panell lateral amb resum, **data de publicació**, portada i crèdit |
+| `src/components/blog/BlogCarousel.jsx` | Carrusel a la portada amb els **últims 3 articles** publicats + enllaç "Veure tot el blog"; no es mostra si no hi ha articles |
+
+### Crèdit a l'autor
+
+Cada article mostra al final *"Article original de **[autor]** — veure la publicació original"* (camps `original_author` + `source_url`) i una nota que el contingut es publica amb permís.
+
+### Dependències afegides
+
+```bash
+npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image dompurify
+```
+
+---
+
 ## Pendiente / Fase 3
 
 ### Bugs / mejoras conocidas de baja prioridad
