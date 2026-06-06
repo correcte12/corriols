@@ -261,6 +261,25 @@
 .exc-p-name  { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.15rem; }
 .exc-p-seats { font-size: 0.72rem; color: var(--exc-muted); margin-bottom: 0.5rem; }
 
+.exc-p-saldos {
+  font-size: 0.68rem;
+  color: var(--exc-muted);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--exc-border);
+}
+
+.exc-p-saldo-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.2rem;
+}
+
+.exc-p-saldo-line strong {
+  color: var(--exc-text);
+  font-weight: 600;
+}
+
 .exc-p-btns {
   display: flex;
   flex-direction: column;

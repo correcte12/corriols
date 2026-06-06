@@ -278,7 +278,7 @@ function NouaExcursio({ onSaved }) {
   )
 }
 
-function HistorialCard({ e, onDelete, onSaved }) {
+function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
   const [editing,   setEditing]   = useState(false)
   const [confirmDel, setConfirmDel] = useState(false)
   const [saving,    setSaving]    = useState(false)
@@ -291,6 +291,60 @@ function HistorialCard({ e, onDelete, onSaved }) {
     passatgers: e.passatgers ?? [],
     notes:     e.notes ?? '',
   })
+
+  // Calcula saldos antes d'aquest viatge (excloent aquest viatge)
+  const saldosAntes = useMemo(() => {
+    const saldos = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
+    for (const exc of allExcursions) {
+      if (exc.id === e.id) continue // Salta aquest viatge
+      const conductors = exc.conductors ?? []
+      const passatgers = exc.passatgers ?? []
+      const km = parseFloat(exc.km) || 0
+      if (conductors.length === 0) continue
+      if (conductors.length === 1) {
+        const cid = conductors[0]
+        if (saldos[cid] !== undefined) saldos[cid] += km * passatgers.length
+      } else {
+        const paxPerCond = Math.floor(passatgers.length / conductors.length)
+        const extra = passatgers.length % conductors.length
+        conductors.forEach((cid, i) => {
+          if (saldos[cid] === undefined) return
+          saldos[cid] += km * (paxPerCond + (i < extra ? 1 : 0))
+        })
+      }
+      const tots = [...conductors, ...passatgers]
+      for (const uid of tots) {
+        if (saldos[uid] !== undefined) saldos[uid] -= km
+      }
+    }
+    return saldos
+  }, [allExcursions, e.id])
+
+  // Calcula l'impacte d'aquest viatge específic
+  const impactViatge = useMemo(() => {
+    const impact = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
+    const conductors = form.conductors
+    const passatgers = form.passatgers
+    const km = parseFloat(form.km) || 0
+    if (conductors.length === 0 || km === 0) return impact
+
+    if (conductors.length === 1) {
+      const cid = conductors[0]
+      if (impact[cid] !== undefined) impact[cid] += km * passatgers.length
+    } else {
+      const paxPerCond = Math.floor(passatgers.length / conductors.length)
+      const extra = passatgers.length % conductors.length
+      conductors.forEach((cid, i) => {
+        if (impact[cid] === undefined) return
+        impact[cid] += km * (paxPerCond + (i < extra ? 1 : 0))
+      })
+    }
+    const tots = [...conductors, ...passatgers]
+    for (const uid of tots) {
+      if (impact[uid] !== undefined) impact[uid] -= km
+    }
+    return impact
+  }, [form.conductors, form.passatgers, form.km])
 
   function toggleArray(field, uid) {
     setForm(f => {
@@ -358,10 +412,18 @@ function HistorialCard({ e, onDelete, onSaved }) {
           {USUARIOS.map(u => {
             const isCond = form.conductors.includes(u.id)
             const isPax  = form.passatgers.includes(u.id)
+            const saldoActual = saldosAntes[u.id] || 0
+            const impacte = impactViatge[u.id] || 0
+            const saldoFinal = saldoActual + impacte
             return (
               <div key={u.id} className={`exc-participant-card ${isCond ? 'cond' : isPax ? 'pax' : ''}`}>
                 <div className="exc-p-name">{u.nombre}</div>
                 <div className="exc-p-seats">{u.asientos} places</div>
+                <div className="exc-p-saldos">
+                  <div className="exc-p-saldo-line">Saldo: <strong>{saldoActual > 0 ? '+' : ''}{saldoActual.toFixed(0)}</strong> km·pas</div>
+                  <div className="exc-p-saldo-line">Impacte: <strong>{impacte > 0 ? '+' : ''}{impacte.toFixed(0)}</strong> km·pas</div>
+                  <div className="exc-p-saldo-line">Final: <strong>{saldoFinal > 0 ? '+' : ''}{saldoFinal.toFixed(0)}</strong> km·pas</div>
+                </div>
                 <div className="exc-p-btns">
                   <button type="button" className={`exc-p-btn ${isCond ? 'active' : ''}`}
                     onClick={() => toggleArray('conductors', u.id)}>Condueix</button>
@@ -427,7 +489,7 @@ function Historial({ excursions, onDelete, onSaved }) {
       <div className="exc-section-title">Historial complet ({excursions.length} sortides)</div>
       {excursions.length === 0 && <p className="exc-empty">Encara no hi ha sortides registrades.</p>}
       {excursions.map(e => (
-        <HistorialCard key={e.id} e={e} onDelete={onDelete} onSaved={onSaved} />
+        <HistorialCard key={e.id} e={e} onDelete={onDelete} onSaved={onSaved} allExcursions={excursions} />
       ))}
     </div>
   )
