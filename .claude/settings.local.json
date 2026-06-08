@@ -12,7 +12,15 @@
       "Bash(cp \"c:/Users/mores/Documents/github/land-page/mis-montanas/src/imagenes/mountain-snow-arcilla.png\" \"c:/Users/mores/Documents/github/corriols/public/logo.png\")",
       "Bash(cp \"c:/Users/mores/Documents/github/land-page/mis-montanas/src/imagenes/wikiloc-icon-48.png\" \"c:/Users/mores/Documents/github/corriols/public/wikiloc-icon.png\")",
       "Bash(cp \"c:/Users/mores/Documents/github/land-page/mis-montanas/src/imagenes/instagram-arcilla-48.png\" \"c:/Users/mores/Documents/github/corriols/public/instagram-icon.png\")",
-      "Read(//c/Users/mores/Documents/github/**)"
+      "Read(//c/Users/mores/Documents/github/**)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(start http://localhost:5173/excursions)",
+      "Bash(npm ls *)",
+      "Bash(curl -s http://localhost:5173/excursions)",
+      "Bash(node test-conductor-esporadico.js)",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit -m 'chore: renombrar Dashboard a Resumen en module d'\\\\''excursions *)"
     ]
   }
 }

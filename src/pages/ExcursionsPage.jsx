@@ -320,21 +320,27 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
     pasajerosPorOtroConductor: e.pasajerosPorOtroConductor ? String(e.pasajerosPorOtroConductor) : '',
   })
 
-  // Calcula saldos antes d'aquest viatge (excloent aquest viatge)
+  // Calcula saldos antes d'aquest viatge (només sortides anteriors en el temps)
   const saldosAntes = useMemo(() => {
     const saldos = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
     for (const exc of allExcursions) {
-      if (exc.id === e.id) continue // Salta aquest viatge
+      // Només computa sortides anteriors en el temps (data més antiga = anterior)
+      if (exc.data >= e.data) continue
       const conductors = exc.conductors ?? []
       const passatgers = exc.passatgers ?? []
       const km = parseFloat(exc.km) || 0
+      const hayOtroConductor = exc.hayOtroConductor ?? false
+      const pasajerosPorOtroConductor = parseInt(exc.pasajerosPorOtroConductor) || 0
+
       if (conductors.length === 0) continue
+      const passatgersRegistrats = Math.max(0, passatgers.length - (hayOtroConductor ? pasajerosPorOtroConductor : 0))
+
       if (conductors.length === 1) {
         const cid = conductors[0]
-        if (saldos[cid] !== undefined) saldos[cid] += km * passatgers.length
+        if (saldos[cid] !== undefined) saldos[cid] += km * passatgersRegistrats
       } else {
-        const paxPerCond = Math.floor(passatgers.length / conductors.length)
-        const extra = passatgers.length % conductors.length
+        const paxPerCond = Math.floor(passatgersRegistrats / conductors.length)
+        const extra = passatgersRegistrats % conductors.length
         conductors.forEach((cid, i) => {
           if (saldos[cid] === undefined) return
           saldos[cid] += km * (paxPerCond + (i < extra ? 1 : 0))
@@ -346,7 +352,7 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
       }
     }
     return saldos
-  }, [allExcursions, e.id])
+  }, [allExcursions, e.id, e.data])
 
   // Calcula l'impacte d'aquest viatge específic
   const impactViatge = useMemo(() => {
@@ -560,7 +566,7 @@ function Historial({ excursions, onDelete, onSaved }) {
 }
 
 // ─── Pàgina principal ─────────────────────────────────────────────────────────
-const VIEWS = ['Dashboard', 'Nova sortida', 'Historial']
+const VIEWS = ['Resumen', 'Nova sortida', 'Historial']
 
 export default function ExcursionsPage() {
   const [loggedUser, setLoggedUser] = useState(() => sessionStorage.getItem('exc_user') || null)
@@ -660,7 +666,7 @@ export default function ExcursionsPage() {
 
       <div className="exc-content">
         {loading && <p className="exc-loading">Carregant...</p>}
-        {!loading && view === 'Dashboard'    && <Dashboard excursions={excursions} saldos={saldos} asistencies={asistencies} ratios={ratios} currentUser={loggedUser} />}
+        {!loading && view === 'Resumen'    && <Dashboard excursions={excursions} saldos={saldos} asistencies={asistencies} ratios={ratios} currentUser={loggedUser} />}
         {!loading && view === 'Nova sortida' && <NouaExcursio onSaved={loadData} />}
         {!loading && view === 'Historial'    && <Historial excursions={excursions} onDelete={handleDelete} onSaved={loadData} />}
       </div>
