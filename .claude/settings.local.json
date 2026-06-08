@@ -20,7 +20,11 @@
       "Bash(curl -s http://localhost:5173/excursions)",
       "Bash(node test-conductor-esporadico.js)",
       "Bash(git commit -m ' *)",
-      "Bash(git commit -m 'chore: renombrar Dashboard a Resumen en module d'\\\\''excursions *)"
+      "Bash(git commit -m 'chore: renombrar Dashboard a Resumen en module d'\\\\''excursions *)",
+      "Bash(git commit -m 'chore: canviar Dashboard a Resum \\(catalán\\) *)",
+      "Bash(git commit -m 'feat: cambiar modelo de saldos a fórmula simple *)",
+      "Bash(git commit -m 'fix: permitir conductor esporádico sin conductor registrado *)",
+      "Bash(git commit -m 'feat: cambiar a sistema de '\\\\''deuda de quilòmetres'\\\\'' *)"
     ]
   }
 }
