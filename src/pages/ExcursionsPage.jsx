@@ -47,20 +47,26 @@ function calcularSaldos(excursions) {
     const conductors = exc.conductors ?? []
     const passatgers = exc.passatgers ?? []
     const km         = parseFloat(exc.km) || 0
+    const hayOtroConductor = exc.hayOtroConductor ?? false
+    const pasajerosPorOtroConductor = parseInt(exc.pasajerosPorOtroConductor) || 0
+
     if (conductors.length === 0) continue
 
     // Cada conductor guanya km × nombre de passatgers que porta al cotxe.
-    // Si hi ha un sol conductor, porta tots els passatgers.
+    // Si hi ha un sol conductor, porta tots els passatgers (menys els del conductor esporádic).
     // Cada assistent (conductor o passatger) es descompta km.
     const tots = [...conductors, ...passatgers]
 
+    // Restar els passatgers portats pel conductor esporádic
+    const passatgersRegistrats = Math.max(0, passatgers.length - (hayOtroConductor ? pasajerosPorOtroConductor : 0))
+
     if (conductors.length === 1) {
       const cid = conductors[0]
-      if (saldos[cid] !== undefined) saldos[cid] += km * passatgers.length
+      if (saldos[cid] !== undefined) saldos[cid] += km * passatgersRegistrats
     } else {
       // Repartiment equitatiu de passatgers entre conductors
-      const paxPerCond = Math.floor(passatgers.length / conductors.length)
-      const extra      = passatgers.length % conductors.length
+      const paxPerCond = Math.floor(passatgersRegistrats / conductors.length)
+      const extra      = passatgersRegistrats % conductors.length
       conductors.forEach((cid, i) => {
         if (saldos[cid] === undefined) return
         saldos[cid] += km * (paxPerCond + (i < extra ? 1 : 0))
@@ -164,6 +170,8 @@ function NouaExcursio({ onSaved }) {
     conductors: [],
     passatgers: [],
     notes: '',
+    hayOtroConductor: false,
+    pasajerosPorOtroConductor: '',
   })
   const [saving, setSaving] = useState(false)
   const [error, setError]   = useState('')
@@ -196,8 +204,10 @@ function NouaExcursio({ onSaved }) {
         conductors: form.conductors,
         passatgers: form.passatgers,
         notes:     form.notes || null,
+        hayOtroConductor: form.hayOtroConductor,
+        pasajerosPorOtroConductor: form.pasajerosPorOtroConductor ? parseInt(form.pasajerosPorOtroConductor) : null,
       })
-      setForm({ data: today, destino: '', km: '', conductors: [], passatgers: [], notes: '' })
+      setForm({ data: today, destino: '', km: '', conductors: [], passatgers: [], notes: '', hayOtroConductor: false, pasajerosPorOtroConductor: '' })
       onSaved()
     } catch (err) {
       setError(err.message)
@@ -253,6 +263,21 @@ function NouaExcursio({ onSaved }) {
         })}
       </div>
 
+      <div className="exc-section-title" style={{ marginTop: '1.25rem' }}>Conductor esporádic (opcional)</div>
+      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+        <input type="checkbox" checked={form.hayOtroConductor}
+          onChange={e => setForm(f => ({ ...f, hayOtroConductor: e.target.checked }))} />
+        <span>Hi ha un conductor addicional no registrat</span>
+      </label>
+      {form.hayOtroConductor && (
+        <label style={{ display: 'block', marginBottom: '1rem' }}>
+          ¿Quants passatgers portava?
+          <input type="number" min="0" max={form.passatgers.length} value={form.pasajerosPorOtroConductor}
+            onChange={e => setForm(f => ({ ...f, pasajerosPorOtroConductor: e.target.value }))}
+            placeholder="0" style={{ marginTop: '0.35rem', width: '80px' }} />
+        </label>
+      )}
+
       {totalPersones > 0 && (
         <div className="exc-preview">
           <strong>Resum:</strong> {form.conductors.map(id => USER_MAP[id]?.nombre).join(', ')} condueixen &bull;{' '}
@@ -260,6 +285,7 @@ function NouaExcursio({ onSaved }) {
             ? form.passatgers.map(id => USER_MAP[id]?.nombre).join(', ') + ' van de passatgers'
             : 'sense passatgers registrats'
           }
+          {form.hayOtroConductor && ` &bull; + un altre conductor (${form.pasajerosPorOtroConductor} passatgers)`}
           {form.km && ` &bull; ${parseFloat(form.km).toFixed(0)} km`}
         </div>
       )}
@@ -290,6 +316,8 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
     conductors: e.conductors ?? [],
     passatgers: e.passatgers ?? [],
     notes:     e.notes ?? '',
+    hayOtroConductor: e.hayOtroConductor ?? false,
+    pasajerosPorOtroConductor: e.pasajerosPorOtroConductor ? String(e.pasajerosPorOtroConductor) : '',
   })
 
   // Calcula saldos antes d'aquest viatge (excloent aquest viatge)
@@ -326,14 +354,19 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
     const conductors = form.conductors
     const passatgers = form.passatgers
     const km = parseFloat(form.km) || 0
+    const hayOtroConductor = form.hayOtroConductor ?? false
+    const pasajerosPorOtroConductor = parseInt(form.pasajerosPorOtroConductor) || 0
+
     if (conductors.length === 0 || km === 0) return impact
+
+    const passatgersRegistrats = Math.max(0, passatgers.length - (hayOtroConductor ? pasajerosPorOtroConductor : 0))
 
     if (conductors.length === 1) {
       const cid = conductors[0]
-      if (impact[cid] !== undefined) impact[cid] += km * passatgers.length
+      if (impact[cid] !== undefined) impact[cid] += km * passatgersRegistrats
     } else {
-      const paxPerCond = Math.floor(passatgers.length / conductors.length)
-      const extra = passatgers.length % conductors.length
+      const paxPerCond = Math.floor(passatgersRegistrats / conductors.length)
+      const extra = passatgersRegistrats % conductors.length
       conductors.forEach((cid, i) => {
         if (impact[cid] === undefined) return
         impact[cid] += km * (paxPerCond + (i < extra ? 1 : 0))
@@ -344,7 +377,7 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
       if (impact[uid] !== undefined) impact[uid] -= km
     }
     return impact
-  }, [form.conductors, form.passatgers, form.km])
+  }, [form.conductors, form.passatgers, form.km, form.hayOtroConductor, form.pasajerosPorOtroConductor])
 
   function toggleArray(field, uid) {
     setForm(f => {
@@ -372,6 +405,8 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
         conductors: form.conductors,
         passatgers: form.passatgers,
         notes:     form.notes || null,
+        hayOtroConductor: form.hayOtroConductor,
+        pasajerosPorOtroConductor: form.pasajerosPorOtroConductor ? parseInt(form.pasajerosPorOtroConductor) : null,
       })
       setEditing(false)
       onSaved()
@@ -447,6 +482,21 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
           })}
         </div>
 
+        <div className="exc-section-title" style={{ marginTop: '1rem' }}>Conductor esporádic (opcional)</div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+          <input type="checkbox" checked={form.hayOtroConductor}
+            onChange={ev => setForm(f => ({ ...f, hayOtroConductor: ev.target.checked }))} />
+          <span>Hi ha un conductor addicional no registrat</span>
+        </label>
+        {form.hayOtroConductor && (
+          <label style={{ display: 'block', marginBottom: '0.75rem' }}>
+            ¿Quants passatgers portava?
+            <input type="number" min="0" max={form.passatgers.length} value={form.pasajerosPorOtroConductor}
+              onChange={ev => setForm(f => ({ ...f, pasajerosPorOtroConductor: ev.target.value }))}
+              placeholder="0" style={{ marginTop: '0.35rem', width: '80px' }} />
+          </label>
+        )}
+
         <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--exc-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>
           Notes
           <textarea rows={2} value={form.notes}
@@ -485,7 +535,9 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
         </div>
       </div>
       <div className="exc-hist-detail">
-        <span>Conductors: {(e.conductors ?? []).map(id => USER_MAP[id]?.nombre ?? id).join(', ') || '—'}</span>
+        <span>Conductors: {(e.conductors ?? []).map(id => USER_MAP[id]?.nombre ?? id).join(', ') || '—'}
+          {e.hayOtroConductor && ` + 1 altre${e.pasajerosPorOtroConductor ? ` (${e.pasajerosPorOtroConductor} pax)` : ''}`}
+        </span>
         {(e.passatgers ?? []).length > 0 &&
           <span>Passatgers: {e.passatgers.map(id => USER_MAP[id]?.nombre ?? id).join(', ')}</span>
         }
