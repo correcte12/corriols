@@ -47,33 +47,16 @@ function calcularSaldos(excursions) {
     const conductors = exc.conductors ?? []
     const passatgers = exc.passatgers ?? []
     const km         = parseFloat(exc.km) || 0
-    const hayOtroConductor = exc.hayOtroConductor ?? false
-    const pasajerosPorOtroConductor = parseInt(exc.pasajerosPorOtroConductor) || 0
 
     if (conductors.length === 0) continue
 
-    // Cada conductor guanya km × nombre de passatgers que porta al cotxe.
-    // Si hi ha un sol conductor, porta tots els passatgers (menys els del conductor esporádic).
-    // Cada assistent (conductor o passatger) es descompta km.
-    const tots = [...conductors, ...passatgers]
-
-    // Restar els passatgers portats pel conductor esporádic
-    const passatgersRegistrats = Math.max(0, passatgers.length - (hayOtroConductor ? pasajerosPorOtroConductor : 0))
-
-    if (conductors.length === 1) {
-      const cid = conductors[0]
-      if (saldos[cid] !== undefined) saldos[cid] += km * passatgersRegistrats
-    } else {
-      // Repartiment equitatiu de passatgers entre conductors
-      const paxPerCond = Math.floor(passatgersRegistrats / conductors.length)
-      const extra      = passatgersRegistrats % conductors.length
-      conductors.forEach((cid, i) => {
-        if (saldos[cid] === undefined) return
-        saldos[cid] += km * (paxPerCond + (i < extra ? 1 : 0))
-      })
+    // Conductors sumen +km (independentment del nombre de passatgers)
+    for (const cid of conductors) {
+      if (saldos[cid] !== undefined) saldos[cid] += km
     }
 
-    for (const uid of tots) {
+    // Passatgers resten -km
+    for (const uid of passatgers) {
       if (saldos[uid] !== undefined) saldos[uid] -= km
     }
   }
@@ -329,25 +312,16 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
       const conductors = exc.conductors ?? []
       const passatgers = exc.passatgers ?? []
       const km = parseFloat(exc.km) || 0
-      const hayOtroConductor = exc.hayOtroConductor ?? false
-      const pasajerosPorOtroConductor = parseInt(exc.pasajerosPorOtroConductor) || 0
 
       if (conductors.length === 0) continue
-      const passatgersRegistrats = Math.max(0, passatgers.length - (hayOtroConductor ? pasajerosPorOtroConductor : 0))
 
-      if (conductors.length === 1) {
-        const cid = conductors[0]
-        if (saldos[cid] !== undefined) saldos[cid] += km * passatgersRegistrats
-      } else {
-        const paxPerCond = Math.floor(passatgersRegistrats / conductors.length)
-        const extra = passatgersRegistrats % conductors.length
-        conductors.forEach((cid, i) => {
-          if (saldos[cid] === undefined) return
-          saldos[cid] += km * (paxPerCond + (i < extra ? 1 : 0))
-        })
+      // Conductors sumen +km
+      for (const cid of conductors) {
+        if (saldos[cid] !== undefined) saldos[cid] += km
       }
-      const tots = [...conductors, ...passatgers]
-      for (const uid of tots) {
+
+      // Passatgers resten -km
+      for (const uid of passatgers) {
         if (saldos[uid] !== undefined) saldos[uid] -= km
       }
     }
@@ -360,30 +334,21 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
     const conductors = form.conductors
     const passatgers = form.passatgers
     const km = parseFloat(form.km) || 0
-    const hayOtroConductor = form.hayOtroConductor ?? false
-    const pasajerosPorOtroConductor = parseInt(form.pasajerosPorOtroConductor) || 0
 
-    if (conductors.length === 0 || km === 0) return impact
+    if (km === 0) return impact
 
-    const passatgersRegistrats = Math.max(0, passatgers.length - (hayOtroConductor ? pasajerosPorOtroConductor : 0))
-
-    if (conductors.length === 1) {
-      const cid = conductors[0]
-      if (impact[cid] !== undefined) impact[cid] += km * passatgersRegistrats
-    } else {
-      const paxPerCond = Math.floor(passatgersRegistrats / conductors.length)
-      const extra = passatgersRegistrats % conductors.length
-      conductors.forEach((cid, i) => {
-        if (impact[cid] === undefined) return
-        impact[cid] += km * (paxPerCond + (i < extra ? 1 : 0))
-      })
+    // Conductors sumen +km
+    for (const cid of conductors) {
+      if (impact[cid] !== undefined) impact[cid] += km
     }
-    const tots = [...conductors, ...passatgers]
-    for (const uid of tots) {
+
+    // Passatgers resten -km
+    for (const uid of passatgers) {
       if (impact[uid] !== undefined) impact[uid] -= km
     }
+
     return impact
-  }, [form.conductors, form.passatgers, form.km, form.hayOtroConductor, form.pasajerosPorOtroConductor])
+  }, [form.conductors, form.passatgers, form.km])
 
   function toggleArray(field, uid) {
     setForm(f => {
@@ -468,7 +433,7 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
                 <div className="exc-p-calc-help">
                   <div className="exc-p-calc-title">Fórmula:</div>
                   {isCond && (
-                    <div className="exc-p-calc-line">Conductor: <strong>+(km × pax) − km</strong></div>
+                    <div className="exc-p-calc-line">Conductor: <strong>+km</strong></div>
                   )}
                   {isPax && (
                     <div className="exc-p-calc-line">Passatger: <strong>−km</strong></div>
