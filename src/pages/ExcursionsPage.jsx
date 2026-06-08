@@ -40,6 +40,10 @@ async function updateExcursion(id, fields) {
 }
 
 // ─── Lògica de saldos ─────────────────────────────────────────────────────────
+// Sistema de "deuda de quilòmetres":
+// - Conductor suma: -(km × nº_passatgers) — lo que "regala"
+// - Passatger suma: +km — lo que "recibe"
+// Qui té saldo positiu alt, ha d'anar de conductor.
 function calcularSaldos(excursions) {
   const saldos = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
 
@@ -50,14 +54,14 @@ function calcularSaldos(excursions) {
 
     if (conductors.length === 0) continue
 
-    // Conductors sumen +km (independentment del nombre de passatgers)
+    // Conductors resten: -(km × nº_passatgers)
     for (const cid of conductors) {
-      if (saldos[cid] !== undefined) saldos[cid] += km
+      if (saldos[cid] !== undefined) saldos[cid] -= km * passatgers.length
     }
 
-    // Passatgers resten -km
+    // Passatgers sumen: +km
     for (const uid of passatgers) {
-      if (saldos[uid] !== undefined) saldos[uid] -= km
+      if (saldos[uid] !== undefined) saldos[uid] += km
     }
   }
 
@@ -85,13 +89,10 @@ function calcularRatios(saldos, asistencies) {
 }
 
 function designarConductors(saldos, asistencies, numConductors = 2) {
+  // Els que tienen saldo positiu más alto (més quilòmetres "regalats") han de conduir
   return USUARIOS
     .slice()
-    .sort((a, b) => {
-      const rA = asistencies[a.id] > 0 ? saldos[a.id] / asistencies[a.id] : 0
-      const rB = asistencies[b.id] > 0 ? saldos[b.id] / asistencies[b.id] : 0
-      return rA - rB
-    })
+    .sort((a, b) => saldos[b.id] - saldos[a.id])
     .slice(0, numConductors)
     .map(u => u.id)
 }
@@ -106,16 +107,15 @@ function Dashboard({ excursions, saldos, asistencies, ratios, currentUser }) {
       <div className="exc-saldo-grid">
         {USUARIOS.map(u => {
           const s = saldos[u.id]
-          const r = ratios[u.id]
           const n = asistencies[u.id]
           return (
             <div key={u.id} className={`exc-saldo-card ${u.id === currentUser ? 'exc-saldo-me' : ''}`}>
               <span className="exc-saldo-name">{u.nombre}</span>
               <span className={`exc-saldo-val ${s < 0 ? 'neg' : s > 0 ? 'pos' : ''}`}>
-                {s > 0 ? '+' : ''}{s.toFixed(0)} km·p
+                {s > 0 ? '+' : ''}{s.toFixed(0)} km
               </span>
               <span style={{ fontSize: '0.7rem', color: 'var(--exc-muted)', marginTop: 2 }}>
-                {n} sortides · ràtio {r > 0 ? '+' : ''}{r.toFixed(1)}
+                {n} sortides {s > 0 ? '(ha de conduir)' : s < 0 ? '(ha conduït)' : '(equilibrat)'}
               </span>
             </div>
           )
@@ -127,7 +127,7 @@ function Dashboard({ excursions, saldos, asistencies, ratios, currentUser }) {
         {suggested.map(uid => (
           <span key={uid} className="exc-suggested-badge">{USER_MAP[uid]?.nombre}</span>
         ))}
-        <span className="exc-suggested-hint">(ràtio km·p / sortides més baix)</span>
+        <span className="exc-suggested-hint">(saldo més alt = més quilòmetres "regalats")</span>
       </div>
 
       <div className="exc-section-title" style={{ marginTop: '2rem' }}>
@@ -316,14 +316,14 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
 
       if (conductors.length === 0) continue
 
-      // Conductors sumen +km
+      // Conductors resten: -(km × nº_passatgers)
       for (const cid of conductors) {
-        if (saldos[cid] !== undefined) saldos[cid] += km
+        if (saldos[cid] !== undefined) saldos[cid] -= km * passatgers.length
       }
 
-      // Passatgers resten -km
+      // Passatgers sumen: +km
       for (const uid of passatgers) {
-        if (saldos[uid] !== undefined) saldos[uid] -= km
+        if (saldos[uid] !== undefined) saldos[uid] += km
       }
     }
     return saldos
@@ -338,14 +338,14 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
 
     if (km === 0) return impact
 
-    // Conductors sumen +km
+    // Conductors resten: -(km × nº_passatgers)
     for (const cid of conductors) {
-      if (impact[cid] !== undefined) impact[cid] += km
+      if (impact[cid] !== undefined) impact[cid] -= km * passatgers.length
     }
 
-    // Passatgers resten -km
+    // Passatgers sumen: +km
     for (const uid of passatgers) {
-      if (impact[uid] !== undefined) impact[uid] -= km
+      if (impact[uid] !== undefined) impact[uid] += km
     }
 
     return impact
@@ -435,10 +435,10 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
                 <div className="exc-p-calc-help">
                   <div className="exc-p-calc-title">Fórmula:</div>
                   {isCond && (
-                    <div className="exc-p-calc-line">Conductor: <strong>+km</strong></div>
+                    <div className="exc-p-calc-line">Conductor: <strong>−(km × pax)</strong></div>
                   )}
                   {isPax && (
-                    <div className="exc-p-calc-line">Passatger: <strong>−km</strong></div>
+                    <div className="exc-p-calc-line">Passatger: <strong>+km</strong></div>
                   )}
                   {!isCond && !isPax && (
                     <div className="exc-p-calc-line" style={{ color: 'var(--exc-muted)' }}>No participant</div>
