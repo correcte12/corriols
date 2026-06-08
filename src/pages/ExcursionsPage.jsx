@@ -173,8 +173,9 @@ function NouaExcursio({ onSaved }) {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!form.destino || !form.km || form.conductors.length === 0) {
-      setError('Cal omplir destí, km i seleccionar almenys un conductor.')
+    const teConductor = form.conductors.length > 0 || form.hayOtroConductor
+    if (!form.destino || !form.km || !teConductor) {
+      setError('Cal omplir destí, km i seleccionar almenys un conductor (o marcar conductor esporádic).')
       return
     }
     setSaving(true)
@@ -362,8 +363,9 @@ function HistorialCard({ e, onDelete, onSaved, allExcursions = [] }) {
   }
 
   async function handleSave() {
-    if (!form.destino || !form.km || form.conductors.length === 0) {
-      setError('Cal omplir destí, km i almenys un conductor.')
+    const teConductor = form.conductors.length > 0 || form.hayOtroConductor
+    if (!form.destino || !form.km || !teConductor) {
+      setError('Cal omplir destí, km i almenys un conductor (o marcar conductor esporádic).')
       return
     }
     setSaving(true)
