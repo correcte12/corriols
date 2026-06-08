@@ -566,7 +566,7 @@ function Historial({ excursions, onDelete, onSaved }) {
 }
 
 // ─── Pàgina principal ─────────────────────────────────────────────────────────
-const VIEWS = ['Resumen', 'Nova sortida', 'Historial']
+const VIEWS = ['Resum', 'Nova sortida', 'Historial']
 
 export default function ExcursionsPage() {
   const [loggedUser, setLoggedUser] = useState(() => sessionStorage.getItem('exc_user') || null)
@@ -666,7 +666,7 @@ export default function ExcursionsPage() {
 
       <div className="exc-content">
         {loading && <p className="exc-loading">Carregant...</p>}
-        {!loading && view === 'Resumen'    && <Dashboard excursions={excursions} saldos={saldos} asistencies={asistencies} ratios={ratios} currentUser={loggedUser} />}
+        {!loading && view === 'Resum'    && <Dashboard excursions={excursions} saldos={saldos} asistencies={asistencies} ratios={ratios} currentUser={loggedUser} />}
         {!loading && view === 'Nova sortida' && <NouaExcursio onSaved={loadData} />}
         {!loading && view === 'Historial'    && <Historial excursions={excursions} onDelete={handleDelete} onSaved={loadData} />}
       </div>
