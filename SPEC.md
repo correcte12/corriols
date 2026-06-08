@@ -177,15 +177,35 @@ Seguiment de rotació de vehicles per al grup d'excursionisme. Persistència a S
 
 IDs: `carlosm`, `carlosj`, `antonio`, `diego`, `luisp`, `juanitog`
 
-### Model de saldos (km·passatger)
+### Model de saldos — "Deuta de quilòmetres"
 
-- Cada **conductor** suma `km × nº passatgers que porta al cotxe`
-- Cada **assistent** (conductor o passatger) resta `km`
-- El resultat net: passatgers acumulen saldo negatiu, conductors acumulen saldo positiu proporcional a quant han conduit
+Sistema matemàticament just basat en "lo que regalas vs. lo que recibes":
+
+- **Conductor suma:** `-(km × nº_passatgers)` → els km que "regala" portant gent
+- **Passatger suma:** `+km` → els km que "rep" sense conduir
+- **No participant:** `0` (no penalitza per no venir)
+
+**Exemple: sortida 100 km amb 4 persones (1 conductor, 3 passatgers)**
+- Juan (conductor): `-300` (regala 100 km a 3 persones)
+- Ana, Luis, Tú (passatgers): `+100` cada un (reben transport)
+- **Total:** -300 + 100 + 100 + 100 = 0 ✓
+
+**Interpretació del saldo:**
+- `Saldo > 0`: ha viajat més sense conduir → **ha de posar cotxe**
+- `Saldo < 0`: ha conduït més → **ja ha pagat la seva part**
+- `Saldo = 0`: equilibrat
 
 ### Designació de conductors
 
-Els conductors suggerits per a la propera sortida s'escullen per **ràtio normalitzat** = `saldo_brut / nº_sortides`, no per saldo brut. Evita penalitzar els qui vénen menys sovint.
+Els **2 conductors suggerits** són els amb **saldo positiu més alt** (els que més quilòmetres han "regalat" durant tot el viatge). Això assegura que els que més han aprofitat el transport sense conduir posin el seu coche.
+
+### Conductor esporádic (opcional)
+
+Per a sortides on ve un conductor extern (no registrat al sistema):
+- Checkbox: "Hi ha un conductor addicional no registrat"
+- Input: "¿Quants passatgers portava?"
+
+Els passatgers portats pel conductor esporádic **no afecten el saldo** dels conductors registrats (es resten del total).
 
 ### Estructura de cada registre a Supabase
 
@@ -196,13 +216,15 @@ Els conductors suggerits per a la propera sortida s'escullen per **ràtio normal
   "km": 180,
   "conductors": ["carlosm", "carlosj"],
   "passatgers": ["antonio", "diego"],
+  "hayOtroConductor": false,
+  "pasajerosPorOtroConductor": null,
   "notes": "Bon temps"
 }
 ```
 
 ### Importació de dades
 
-Per importar moviments existents: CSV o JSON amb els camps anteriors. Els IDs de passatgers/conductors han de coincidir exactament amb els IDs d'usuari definits.
+Per importar moviments existents: CSV o JSON amb els camps anteriors. Els IDs de passatgers/conductors han de coincidir exactament amb els IDs d'usuari definits. Els camps `hayOtroConductor` i `pasajerosPorOtroConductor` són opcionals (default: `false` / `null`).
 
 ---
 
