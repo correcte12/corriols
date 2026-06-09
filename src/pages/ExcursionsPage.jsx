@@ -667,11 +667,11 @@ function Comparativa({ excursions }) {
       <div style={{ overflowX: 'auto', marginBottom: '2rem' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
           <thead>
-            <tr style={{ background: 'var(--exc-bg-secondary, #f5f5f5)', borderBottom: '2px solid var(--exc-border)' }}>
-              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 600 }}>Usuari</th>
-              <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 600 }}>V1: Deuta</th>
-              <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 600 }}>V2: Consum</th>
-              <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 600 }}>V3: Consum+Ratio</th>
+            <tr style={{ background: '#1e293b', borderBottom: '2px solid var(--exc-border)' }}>
+              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 600, color: 'var(--exc-text)' }}>Usuari</th>
+              <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 600, color: 'var(--exc-text)' }}>V1: Deuta</th>
+              <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 600, color: 'var(--exc-text)' }}>V2: Consum</th>
+              <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 600, color: 'var(--exc-text)' }}>V3: Consum+Ratio</th>
             </tr>
           </thead>
           <tbody>
