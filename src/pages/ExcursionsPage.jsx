@@ -211,15 +211,15 @@ function Dashboard({ excursions, saldos, asistencies, ratios, currentUser, varia
 
   return (
     <div className="exc-dashboard">
-      <div className="exc-variant-selector" style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--exc-bg-secondary, #f5f5f5)', borderRadius: '6px' }}>
+      <div className="exc-variant-selector" style={{ marginBottom: '1.5rem', padding: '1rem', background: '#1e293b', borderRadius: '6px', border: '1px solid var(--exc-border)' }}>
         <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--exc-muted)' }}>
           Mètode de càlcul
         </label>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           {['v1', 'v2', 'v3'].map(v => (
-            <label key={v} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+            <label key={v} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: 'var(--exc-text)' }}>
               <input type="radio" name="variant" value={v} checked={variant === v} onChange={e => onVariantChange(e.target.value)} />
-              <span style={{ fontSize: '0.9rem' }}>{variantLabels[v]}</span>
+              <span style={{ fontSize: '0.9rem', color: 'var(--exc-text)' }}>{variantLabels[v]}</span>
             </label>
           ))}
         </div>
