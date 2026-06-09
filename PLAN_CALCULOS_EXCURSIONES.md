@@ -144,13 +144,14 @@ Al insertar/editar excursión:
 ---
 
 ## Estado de Implementación
-- [ ] Migración BD (agregar 3 campos JSONB)
-- [ ] Función calcularSaldos_V1
-- [ ] Función calcularSaldos_V2
-- [ ] Función calcularSaldos_V3
-- [ ] Lógica de guardado (guardar 3 subtotales)
-- [ ] Dashboard: botón radio para seleccionar variante
-- [ ] Pestaña "Comparativa"
-- [ ] Pestaña "Explicació"
+- [x] Migración BD (agregar 3 campos JSONB)
+- [x] Función calcularSaldos_V1
+- [x] Función calcularSaldos_V2
+- [x] Función calcularSaldos_V3
+- [x] Lógica de guardado (guardar 3 subtotales)
+- [x] Dashboard: botón radio para seleccionar variante
+- [x] Pestaña "Comparativa"
+- [x] Pestaña "Explicació"
+- [ ] Aplicar migración BD en Supabase (ejecutar: `supabase db push`)
 - [ ] Testing con datos reales del Excel
 
