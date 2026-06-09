@@ -152,6 +152,10 @@ Al insertar/editar excursión:
 - [x] Dashboard: botón radio para seleccionar variante
 - [x] Pestaña "Comparativa"
 - [x] Pestaña "Explicació"
-- [ ] Aplicar migración BD en Supabase (ejecutar: `supabase db push`)
+- [x] Aplicar migración BD en Supabase (ejecutado: `supabase db push`)
+- [x] Fixes de contraste en UI (header tabla, selector variante)
+- [ ] Actualizar excursiones existentes (editarlas para recalcular subtotales)
 - [ ] Testing con datos reales del Excel
+
+**Nota:** Las excursiones existentes antes de la migración no tienen subtotales. Al editar cada una, se recalcularán automáticamente los 3 métodos.
 
