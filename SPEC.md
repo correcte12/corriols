@@ -177,27 +177,54 @@ Seguiment de rotació de vehicles per al grup d'excursionisme. Persistència a S
 
 IDs: `carlosm`, `carlosj`, `antonio`, `diego`, `luisp`, `juanitog`
 
-### Model de saldos — "Deuta de quilòmetres"
+### Models de saldos — 3 variantes de càlcul
+
+Cada excursió es calcula amb **3 mètodes diferents** per poder comparar quins és més just. Els subtotals de les 3 variantes es guarden automàticament en cada registre.
+
+#### **Variante 1: Deuta de quilòmetres** (actual)
 
 Sistema matemàticament just basat en "lo que regalas vs. lo que recibes":
 
-- **Conductor suma:** `-(km × nº_passatgers)` → els km que "regala" portant gent
-- **Passatger suma:** `+km` → els km que "rep" sense conduir
-- **No participant:** `0` (no penalitza per no venir)
+- **Conductor suma:** `-(km × nº_passatgers)` → els km que "regala"
+- **Passatger suma:** `+km` → els km que "rep"
+- **No participant:** `0`
 
 **Exemple: sortida 100 km amb 4 persones (1 conductor, 3 passatgers)**
 - Juan (conductor): `-300` (regala 100 km a 3 persones)
 - Ana, Luis, Tú (passatgers): `+100` cada un (reben transport)
 - **Total:** -300 + 100 + 100 + 100 = 0 ✓
 
-**Interpretació del saldo:**
+#### **Variante 2: Consumo de plazas**
+
+Enfocada al concepte de "consumo de recursos":
+
+- **Conductor suma:** `-(km × nº_passatgers_nets)` → lo que "aporta"
+- **Passatger suma:** `+km` → lo que "consume"
+- **No participant:** `0`
+
+Fórmula idèntica a V1 conceptualment; la diferència és el marc d'interpretació (consumo vs. deuta).
+
+#### **Variante 3: Consumo + Ratio de asistencia**
+
+Variante 2 ajustada per penalitzar (o equilibrar) qui assisteix esporàdicament:
+
+1. Calcula saldos amb **Variante 2**
+2. Calcula ratio asistència: `ratio = asistències / total_excursions`
+3. Factor multiplicador: `factor = (100 - (ratio × 100)) / 100`
+4. **Saldo final:** `saldo_v2 × factor`
+
+**Exemple:** 15 de 20 excursions = 75% asistència
+- Factor = (100 - 75) / 100 = 0.25
+- Si V2 dona +200 → V3 = 200 × 0.25 = +50
+
+**Interpretació:**
 - `Saldo > 0`: ha viajat més sense conduir → **ha de posar cotxe**
-- `Saldo < 0`: ha conduït més → **ja ha pagat la seva part**
+- `Saldo < 0`: ha conduït més → **ja ha pagat**
 - `Saldo = 0`: equilibrat
 
 ### Designació de conductors
 
-Els **2 conductors suggerits** són els amb **saldo positiu més alt** (els que més quilòmetres han "regalat" durant tot el viatge). Això assegura que els que més han aprofitat el transport sense conduir posin el seu coche.
+Els **2 conductors suggerits** són els amb **saldo positiu més alt** del mètode seleccionat (els que més quilòmetres han "regalat"). Els saldos recalculen automàticament quan canvies de variante.
 
 ### Conductor esporádic (opcional)
 
@@ -205,7 +232,7 @@ Per a sortides on ve un conductor extern (no registrat al sistema):
 - Checkbox: "Hi ha un conductor addicional no registrat"
 - Input: "¿Quants passatgers portava?"
 
-Els passatgers portats pel conductor esporádic **no afecten el saldo** dels conductors registrats (es resten del total).
+Els passatgers portats pel conductor esporádic **no afecten el saldo** dels conductors registrats (es resten del total). Aplica a V1, V2 i V3.
 
 ### Estructura de cada registre a Supabase
 
@@ -218,13 +245,22 @@ Els passatgers portats pel conductor esporádic **no afecten el saldo** dels con
   "passatgers": ["antonio", "diego"],
   "hayOtroConductor": false,
   "pasajerosPorOtroConductor": null,
-  "notes": "Bon temps"
+  "notes": "Bon temps",
+  "subtotal_variant1": {"carlosm": -300, "carlosj": -300, "antonio": 150, "diego": 150, ...},
+  "subtotal_variant2": {"carlosm": -300, "carlosj": -300, "antonio": 150, "diego": 150, ...},
+  "subtotal_variant3": {"carlosm": -75, "carlosj": -75, "antonio": 37.5, "diego": 37.5, ...}
 }
 ```
 
+### Vista del Dashboard
+
+- **Pestaña "Resum":** Selector radio de variante (V1/V2/V3) + taula de saldos actuals + segereix 2 conductors + últimes 5 sortides
+- **Pestaña "Comparativa":** Taula 3×n amb saldo de cada usuari en cada variante + evolució per sortida
+- **Pestaña "Explicació":** Documentació interactiva de cada mètode amb exemples
+
 ### Importació de dades
 
-Per importar moviments existents: CSV o JSON amb els camps anteriors. Els IDs de passatgers/conductors han de coincidir exactament amb els IDs d'usuari definits. Els camps `hayOtroConductor` i `pasajerosPorOtroConductor` són opcionals (default: `false` / `null`).
+Per importar moviments existents: CSV o JSON amb els camps base anteriors. Els IDs de passatgers/conductors han de coincidir exactament amb els IDs d'usuari definits. Els camps `subtotal_variant*` es calculen automàticament al guardar; no és necessari aportar-los.
 
 ---
 
