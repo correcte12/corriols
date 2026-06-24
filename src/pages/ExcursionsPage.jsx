@@ -828,22 +828,22 @@ function Explicacio() {
           Variante 1: Deuta de Quilòmetres
         </h3>
         <div style={{ background: 'var(--exc-bg-secondary, #f5f5f5)', padding: '1rem', borderRadius: '6px', marginBottom: '1rem' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5 }}>
+          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5, color: 'var(--exc-text)' }}>
             <strong>Fórmula:</strong>
           </p>
-          <ul style={{ margin: '0.5rem 0 0.5rem 1.5rem', padding: 0, fontSize: '0.95rem', lineHeight: 1.6 }}>
+          <ul style={{ margin: '0.5rem 0 0.5rem 1.5rem', padding: 0, fontSize: '0.95rem', lineHeight: 1.6, color: 'var(--exc-muted)' }}>
             <li><strong>Conductor:</strong> −(km × nº passatgers) = lo que "regala"</li>
             <li><strong>Passatger:</strong> +km = lo que "recibe"</li>
           </ul>
-          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: '#666' }}>
+          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
             <strong>Exemple:</strong> Sortida 100 km, 4 persones (1 conductor + 3 passatgers)
           </p>
-          <ul style={{ margin: '0.5rem 0 0 1.5rem', padding: 0, fontSize: '0.9rem', color: '#666' }}>
+          <ul style={{ margin: '0.5rem 0 0 1.5rem', padding: 0, fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
             <li>Juan (conductor): −100 × 3 = <strong>−300</strong></li>
             <li>Ana, Luis, Tú (passatgers): +100 = <strong>+100</strong> cada un</li>
             <li>Total: −300 + 100 + 100 + 100 = <strong>0</strong> ✓</li>
           </ul>
-          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: '#666' }}>
+          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
             <strong>Interpretació:</strong> Positiu = ha viatjat sense conduir (ha de posar coche) | Negatiu = ha conduït més (ja ha pagat)
           </p>
         </div>
@@ -854,24 +854,24 @@ function Explicacio() {
           Variante 2: Consumo de Plazas
         </h3>
         <div style={{ background: 'var(--exc-bg-secondary, #f5f5f5)', padding: '1rem', borderRadius: '6px', marginBottom: '1rem' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5 }}>
+          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5, color: 'var(--exc-text)' }}>
             <strong>Fórmula:</strong>
           </p>
-          <ul style={{ margin: '0.5rem 0 0.5rem 1.5rem', padding: 0, fontSize: '0.95rem', lineHeight: 1.6 }}>
+          <ul style={{ margin: '0.5rem 0 0.5rem 1.5rem', padding: 0, fontSize: '0.95rem', lineHeight: 1.6, color: 'var(--exc-muted)' }}>
             <li><strong>Conductor:</strong> −(km × nº passatgers nets) = lo que "aporta"</li>
             <li><strong>Passatger:</strong> +km = lo que "consume"</li>
           </ul>
-          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: '#666' }}>
+          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
             <strong>Exemple:</strong> Sortida 100 km, 4 persones (1 conductor + 3 passatgers)
           </p>
-          <ul style={{ margin: '0.5rem 0 0 1.5rem', padding: 0, fontSize: '0.9rem', color: '#666' }}>
+          <ul style={{ margin: '0.5rem 0 0 1.5rem', padding: 0, fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
             <li>Juan (conductor): −100 × 3 = <strong>−300</strong></li>
             <li>Ana, Luis, Tú (passatgers): +100 = <strong>+100</strong> cada un</li>
           </ul>
-          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: '#666' }}>
+          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
             <strong>Nota:</strong> En aquesta versió, les fórmules són similars a la V1. La diferència és conceptual (enfocada al "consum" vs "deuta").
           </p>
-          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: '#666' }}>
+          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
             <strong>Amb conductor esporádic:</strong> Si un conductor extern porta 2 passatgers, el total nets es 3 − 2 = 1
           </p>
         </div>
@@ -882,25 +882,25 @@ function Explicacio() {
           Variante 3: Consumo + Ratio de Asistencia
         </h3>
         <div style={{ background: 'var(--exc-bg-secondary, #f5f5f5)', padding: '1rem', borderRadius: '6px', marginBottom: '1rem' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5 }}>
+          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5, color: 'var(--exc-text)' }}>
             <strong>Fórmula:</strong>
           </p>
-          <ol style={{ margin: '0.5rem 0 0.5rem 1.5rem', padding: 0, fontSize: '0.95rem', lineHeight: 1.6 }}>
+          <ol style={{ margin: '0.5rem 0 0.5rem 1.5rem', padding: 0, fontSize: '0.95rem', lineHeight: 1.6, color: 'var(--exc-muted)' }}>
             <li>Calcula V2 (Consumo de Plazas)</li>
             <li>Calcula ratio asistència: ratio = asistències / total excursions</li>
             <li>Factor multiplicador: factor = (100 − (ratio × 100)) / 100</li>
             <li>Saldo final: saldo_V2 × factor</li>
           </ol>
-          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: '#666' }}>
+          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
             <strong>Exemple:</strong>
           </p>
-          <ul style={{ margin: '0.5rem 0 0 1.5rem', padding: 0, fontSize: '0.9rem', color: '#666' }}>
+          <ul style={{ margin: '0.5rem 0 0 1.5rem', padding: 0, fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
             <li>Total excursions: 20</li>
             <li>Tu has assistit: 15 (ratio = 75%)</li>
             <li>Factor: (100 − 75) / 100 = 0.25</li>
             <li>Si la V2 t'dona +200 → V3 = 200 × 0.25 = <strong>+50</strong></li>
           </ul>
-          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: '#666' }}>
+          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
             <strong>Interpretació:</strong> A menor asistència, major multiplicador. Penalitza (o equilibra) a qui assisteix esporàdicament, evitant saldos massa alts/baixos.
           </p>
         </div>
@@ -911,13 +911,13 @@ function Explicacio() {
           Quan usar cada una?
         </h3>
         <div style={{ background: 'var(--exc-bg-secondary, #f5f5f5)', padding: '1rem', borderRadius: '6px' }}>
-          <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem' }}>
+          <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', color: 'var(--exc-muted)' }}>
             <strong>V1 (Deuta):</strong> Més simple i intuitiva. Cada km pesa igual, el que "regales" es exactament lo que els altres "reben".
           </p>
-          <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem' }}>
+          <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', color: 'var(--exc-muted)' }}>
             <strong>V2 (Consum):</strong> Enfocada al concepte de "consumo de recursos". Qui condueix més, més resten els seus quilòmetres.
           </p>
-          <p style={{ margin: '0', fontSize: '0.95rem' }}>
+          <p style={{ margin: '0', fontSize: '0.95rem', color: 'var(--exc-muted)' }}>
             <strong>V3 (Consum+Ratio):</strong> Per grups on la asistencia és irregular. Evita que qui sempre va acumuli saldos massa grans.
           </p>
         </div>
