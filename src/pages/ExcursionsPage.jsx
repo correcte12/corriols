@@ -783,30 +783,30 @@ function Comparativa({ excursions }) {
       <div className="exc-section-title" style={{ marginTop: '2rem' }}>Evolució per sortida</div>
       {excursions.slice().reverse().map(e => (
         <div key={e.id} style={{ padding: '1rem', background: 'var(--exc-bg-secondary, #f5f5f5)', borderRadius: '6px', marginBottom: '0.75rem' }}>
-          <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>
+          <div style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--exc-text)' }}>
             {e.data} — {e.destino} ({parseFloat(e.km).toFixed(0)} km)
           </div>
           <div style={{ fontSize: '0.85rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
             <div>
-              <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>V1: Deuta</div>
+              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-text)' }}>V1: Deuta</div>
               {USUARIOS.map(u => (
-                <div key={u.id} style={{ fontSize: '0.8rem', color: '#666' }}>
+                <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
                   {u.nombre}: {e.subtotal_variant1 ? (e.subtotal_variant1[u.id] > 0 ? '+' : '') + e.subtotal_variant1[u.id].toFixed(0) : '—'}
                 </div>
               ))}
             </div>
             <div>
-              <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>V2: Consum</div>
+              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-text)' }}>V2: Consum</div>
               {USUARIOS.map(u => (
-                <div key={u.id} style={{ fontSize: '0.8rem', color: '#666' }}>
+                <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
                   {u.nombre}: {e.subtotal_variant2 ? (e.subtotal_variant2[u.id] > 0 ? '+' : '') + e.subtotal_variant2[u.id].toFixed(0) : '—'}
                 </div>
               ))}
             </div>
             <div>
-              <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>V3: Consum+Ratio</div>
+              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-text)' }}>V3: Consum+Ratio</div>
               {USUARIOS.map(u => (
-                <div key={u.id} style={{ fontSize: '0.8rem', color: '#666' }}>
+                <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
                   {u.nombre}: {e.subtotal_variant3 ? (e.subtotal_variant3[u.id] > 0 ? '+' : '') + e.subtotal_variant3[u.id].toFixed(0) : '—'}
                 </div>
               ))}
