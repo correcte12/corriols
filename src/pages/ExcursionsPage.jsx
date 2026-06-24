@@ -796,7 +796,7 @@ function Comparativa({ excursions }) {
               ))}
             </div>
             <div>
-              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-text)' }}>V2: Consum</div>
+              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-accent)' }}>V2: Consum</div>
               {USUARIOS.map(u => (
                 <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
                   {u.nombre}: {e.subtotal_variant2 ? (e.subtotal_variant2[u.id] > 0 ? '+' : '') + e.subtotal_variant2[u.id].toFixed(0) : '—'}
@@ -804,7 +804,7 @@ function Comparativa({ excursions }) {
               ))}
             </div>
             <div>
-              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-text)' }}>V3: Consum+Ratio</div>
+              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-accent)' }}>V3: Consum+Ratio</div>
               {USUARIOS.map(u => (
                 <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
                   {u.nombre}: {e.subtotal_variant3 ? (e.subtotal_variant3[u.id] > 0 ? '+' : '') + e.subtotal_variant3[u.id].toFixed(0) : '—'}
