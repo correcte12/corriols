@@ -1,11 +1,11 @@
-# Plan: Sistema de 3 Variantes de Cálculo de Saldos - Dijous d'Excursió
+# Plan: Sistema de 2 Variantes de Cálculo de Saldos - Dijous d'Excursió
 
 ## Objetivo
-Implementar 3 métodos de cálculo de saldos de kilómetros para poder comparar y evaluar cuál es más justo. Cada excursión guardará los subtotales de los 3 métodos.
+Implementar 2 métodos de cálculo de saldos de kilómetros para poder comparar. Cada excursión guardará los subtotales de los 2 métodos.
 
 ---
 
-## 3 Tipos de Cálculo
+## 2 Tipos de Cálculo
 
 ### **Variante 1: Deuta de Quilòmetres (Actual)**
 Modelo matemáticamente justo por km y pasajeros.
@@ -54,36 +54,13 @@ Basada en lo que cada persona "consume" y lo que el conductor "aporta".
 
 ---
 
-### **Variante 3: Consumo de Plazas + Ratio de Asistencia**
-Variante 2 ajustada por asistencia. Penaliza (o equilibra) a quienes asisten esporádicamente.
-
-**Fórmula:**
-1. Calcular saldos con **Variante 2**
-2. Calcular ratio de asistencia: `ratio = asistencias / total_excursiones`
-3. Calcular factor multiplicador: `factor = (100 - (ratio × 100)) / 100`
-4. **Saldo final:** `saldo_v2 × factor`
-
-**Interpretación:** A menor asistencia, mayor multiplicador del saldo.
-
-**Ejemplo:**
-- Total de excursiones: 20
-- Tú has asistido: 15
-- Ratio: 15/20 = 0.75 (75%)
-- Factor: (100 - 75) / 100 = 0.25
-- Si tu saldo en V2 es +200 → en V3 = 200 × 0.25 = +50
-
-**Ventaja:** Evita que quienes asisten siempre tengan saldos muy altos/bajos.
-
----
-
 ## Plan de Implementación
 
 ### 1. Migración de Base de Datos
-Agregar 3 campos JSONB a tabla `grup_excursions`:
+Agregar 2 campos JSONB a tabla `grup_excursions`:
 ```sql
 ALTER TABLE public.grup_excursions ADD COLUMN IF NOT EXISTS subtotal_variant1 jsonb DEFAULT NULL;
 ALTER TABLE public.grup_excursions ADD COLUMN IF NOT EXISTS subtotal_variant2 jsonb DEFAULT NULL;
-ALTER TABLE public.grup_excursions ADD COLUMN IF NOT EXISTS subtotal_variant3 jsonb DEFAULT NULL;
 ```
 
 Estructura del JSONB:
@@ -97,66 +74,66 @@ Estructura del JSONB:
 ```
 
 ### 2. Funciones de Cálculo (en ExcursionsPage.jsx)
-Crear 3 funciones independientes:
-- `calcularSaldos_V1(excursions)` → saldos variante 1
-- `calcularSaldos_V2(excursions)` → saldos variante 2
-- `calcularSaldos_V3(excursions)` → saldos variante 3 (usa V2 + ratio)
+Crear 2 funciones de cálculo global y 2 de delta:
+- `calcularSaldos_V1(excursions)` → saldos acumulados variante 1
+- `calcularSaldos_V2(excursions)` → saldos acumulados variante 2
+- `calcularDeltaV1(excursion)` → delta de esa excursión en V1
+- `calcularDeltaV2(excursion)` → delta de esa excursión en V2
 
 Cada función retorna: `{ usuario_id: saldo, ... }`
 
 ### 3. Lógica de Guardado
 Al insertar/editar excursión:
-1. Calcula todos los saldos (V1, V2, V3) con todas las excursiones existentes + la nueva
-2. Guarda los 3 subtotales en los campos JSONB
-3. Cuando se entra una excursión antigua, recalcula automáticamente desde esa fecha
+1. Calcula los deltas (V1, V2) con el contexto de todas las excursiones
+2. Guarda los 2 subtotales en los campos JSONB
+3. Cuando se entra una excursión antigua, se recalcula automáticamente su delta
 
 ### 4. Dashboard - Modificaciones
 **Pestaña "Resum" (existente):**
-- Agregar botón radio para seleccionar variante: `[ ○ V1 | ○ V2 | ○ V3 ]`
+- Agregar botón radio para seleccionar variante: `[ ○ V1 | ○ V2 ]`
 - Los saldos mostrados cambiarán según selección
 - Sugerencia de conductores se actualiza según variante activa
-- Mantener historial de últimas 5 excursiones
 
 **Nueva pestaña "Comparativa":**
-- Tabla con 3 columnas (V1, V2, V3)
+- Tabla con 2 columnas (V1, V2)
 - Fila por usuario mostrando su saldo final en cada variante
-- Opcionalmente: tabla adicional excursión por excursión
+- Sección evolció per sortida con deltas por excursión
 
 **Nueva pestaña "Explicació":**
 - Descripción visual de cada método
 - Ejemplos paso a paso
-- Cuándo usar cada uno
-- FAQ
+- Diferencias conceptuales entre V1 y V2
 
 ### 5. Vistas a Implementar
-1. **Dashboard (Resum):** botón radio + saldos por variante
-2. **Comparativa:** tabla 3 columnas
-3. **Explicació:** info + ejemplos
+1. **Dashboard (Resum):** selector variante (V1/V2) + saldos
+2. **Comparativa:** tabla 2 columnas + evolció per sortida
+3. **Explicació:** info de V1 y V2
 
 ---
 
 ## Notas Importantes
-- Variante 3 siempre se calcula **sobre Variante 2**, no sobre V1
 - Las excursiones se ordenan siempre por `data` (fecha de ocurrencia), nunca por `created_at`
-- Cada excursión guarda su **delta** (cambio) en los 3 subtotales, no saldos cumulativos
+- Cada excursión guarda su **delta** (cambio) en los 2 subtotales, no saldos cumulativos
   - V1/V2: cambio por conductor y pasajeros de esa excursión
-  - V3: delta de V2 multiplicado por ratio de asistencia global
-- El conductor esporádico afecta a V1 y V2 de la misma forma
-- Al editar una excursión, se recalcula automáticamente su delta con el contexto completo de asistencias
+  - Pasajeros divididos equitativamente entre conductores
+- El conductor esporádico no puntúa pero sus pasajeros se restan del total
+- Al editar una excursión, se recalcula automáticamente su delta
 
 ---
 
 ## Estado de Implementación
-- [x] Migración BD (agregar 3 campos JSONB para subtotales)
-- [x] Función calcularSaldos_V1, V2, V3 (para dashboard global)
-- [x] Funciones calcularDeltaV1, V2, V3 (para deltas por excursión)
+- [x] Migración BD (agregar 2 campos JSONB para subtotales)
+- [x] Función calcularSaldos_V1, V2 (para dashboard global)
+- [x] Funciones calcularDeltaV1, V2 (para deltas por excursión)
 - [x] Función calcularSubtotalesParaExcursion (contexto + delta)
-- [x] Lógica de guardado (guardar 3 deltas por excursión)
-- [x] Dashboard: botón radio para seleccionar variante
-- [x] Pestaña "Comparativa" con tabla 3 columnas + evolció per sortida
-- [x] Pestaña "Explicació" con documentación y ejemplos
+- [x] Lógica de guardado (guardar 2 deltas por excursión)
+- [x] Pasajeros divididos equitativamente entre conductores
+- [x] Dashboard: selector variante (V1/V2)
+- [x] Pestaña "Comparativa" con tabla 2 columnas + evolció per sortida
+- [x] Pestaña "Explicació" con V1 y V2
 - [x] Aplicar migración BD en Supabase
-- [x] Fixes de contraste en UI (colores visibles en ambos fondos)
+- [x] Fixes de contraste en UI
+- [x] Eliminar Variante 3 (ratio de asistencia)
 - [x] Build de producción (`npm run build`)
 
 **✓ Implementación completada**
