@@ -138,24 +138,26 @@ Al insertar/editar excursión:
 ## Notas Importantes
 - Variante 3 siempre se calcula **sobre Variante 2**, no sobre V1
 - Las excursiones se ordenan siempre por `data` (fecha de ocurrencia), nunca por `created_at`
-- Al editar una excursión antigua, se recalculan automáticamente todos los subtotales posteriores
+- Cada excursión guarda su **delta** (cambio) en los 3 subtotales, no saldos cumulativos
+  - V1/V2: cambio por conductor y pasajeros de esa excursión
+  - V3: delta de V2 multiplicado por ratio de asistencia global
 - El conductor esporádico afecta a V1 y V2 de la misma forma
+- Al editar una excursión, se recalcula automáticamente su delta con el contexto completo de asistencias
 
 ---
 
 ## Estado de Implementación
-- [x] Migración BD (agregar 3 campos JSONB)
-- [x] Función calcularSaldos_V1
-- [x] Función calcularSaldos_V2
-- [x] Función calcularSaldos_V3
-- [x] Lógica de guardado (guardar 3 subtotales)
+- [x] Migración BD (agregar 3 campos JSONB para subtotales)
+- [x] Función calcularSaldos_V1, V2, V3 (para dashboard global)
+- [x] Funciones calcularDeltaV1, V2, V3 (para deltas por excursión)
+- [x] Función calcularSubtotalesParaExcursion (contexto + delta)
+- [x] Lógica de guardado (guardar 3 deltas por excursión)
 - [x] Dashboard: botón radio para seleccionar variante
-- [x] Pestaña "Comparativa"
-- [x] Pestaña "Explicació"
-- [x] Aplicar migración BD en Supabase (ejecutado: `supabase db push`)
-- [x] Fixes de contraste en UI (header tabla, selector variante)
-- [ ] Actualizar excursiones existentes (editarlas para recalcular subtotales)
-- [ ] Testing con datos reales del Excel
+- [x] Pestaña "Comparativa" con tabla 3 columnas + evolció per sortida
+- [x] Pestaña "Explicació" con documentación y ejemplos
+- [x] Aplicar migración BD en Supabase
+- [x] Fixes de contraste en UI (colores visibles en ambos fondos)
+- [x] Build de producción (`npm run build`)
 
-**Nota:** Las excursiones existentes antes de la migración no tienen subtotales. Al editar cada una, se recalcularán automáticamente los 3 métodos.
+**✓ Implementación completada**
 
