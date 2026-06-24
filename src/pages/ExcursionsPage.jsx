@@ -783,7 +783,7 @@ function Comparativa({ excursions }) {
       <div className="exc-section-title" style={{ marginTop: '2rem' }}>Evolució per sortida</div>
       {excursions.slice().reverse().map(e => (
         <div key={e.id} style={{ padding: '1rem', background: 'var(--exc-bg-secondary, #f5f5f5)', borderRadius: '6px', marginBottom: '0.75rem' }}>
-          <div style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--exc-text)' }}>
+          <div style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--exc-accent)' }}>
             {e.data} — {e.destino} ({parseFloat(e.km).toFixed(0)} km)
           </div>
           <div style={{ fontSize: '0.85rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
