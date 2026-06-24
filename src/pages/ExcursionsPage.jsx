@@ -788,7 +788,7 @@ function Comparativa({ excursions }) {
           </div>
           <div style={{ fontSize: '0.85rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
             <div>
-              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-text)' }}>V1: Deuta</div>
+              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-accent)' }}>V1: Deuta</div>
               {USUARIOS.map(u => (
                 <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
                   {u.nombre}: {e.subtotal_variant1 ? (e.subtotal_variant1[u.id] > 0 ? '+' : '') + e.subtotal_variant1[u.id].toFixed(0) : '—'}
