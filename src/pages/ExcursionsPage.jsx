@@ -828,7 +828,7 @@ function Explicacio() {
           Variante 1: Deuta de Quilòmetres
         </h3>
         <div style={{ background: 'var(--exc-bg-secondary, #f5f5f5)', padding: '1rem', borderRadius: '6px', marginBottom: '1rem' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5, color: 'var(--exc-text)' }}>
+          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5, color: 'var(--exc-accent)' }}>
             <strong>Fórmula:</strong>
           </p>
           <ul style={{ margin: '0.5rem 0 0.5rem 1.5rem', padding: 0, fontSize: '0.95rem', lineHeight: 1.6, color: 'var(--exc-muted)' }}>
@@ -854,7 +854,7 @@ function Explicacio() {
           Variante 2: Consumo de Plazas
         </h3>
         <div style={{ background: 'var(--exc-bg-secondary, #f5f5f5)', padding: '1rem', borderRadius: '6px', marginBottom: '1rem' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5, color: 'var(--exc-text)' }}>
+          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5, color: 'var(--exc-accent)' }}>
             <strong>Fórmula:</strong>
           </p>
           <ul style={{ margin: '0.5rem 0 0.5rem 1.5rem', padding: 0, fontSize: '0.95rem', lineHeight: 1.6, color: 'var(--exc-muted)' }}>
@@ -882,7 +882,7 @@ function Explicacio() {
           Variante 3: Consumo + Ratio de Asistencia
         </h3>
         <div style={{ background: 'var(--exc-bg-secondary, #f5f5f5)', padding: '1rem', borderRadius: '6px', marginBottom: '1rem' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5, color: 'var(--exc-text)' }}>
+          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5, color: 'var(--exc-accent)' }}>
             <strong>Fórmula:</strong>
           </p>
           <ol style={{ margin: '0.5rem 0 0.5rem 1.5rem', padding: 0, fontSize: '0.95rem', lineHeight: 1.6, color: 'var(--exc-muted)' }}>
