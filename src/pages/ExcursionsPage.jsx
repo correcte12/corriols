@@ -25,9 +25,9 @@ async function fetchExcursions() {
 }
 
 async function saveExcursion(excursion, allExcursionsForContext = []) {
-  // Calcular subtotales incluyendo la nueva excursión
-  const excursionsForCalc = [...allExcursionsForContext, excursion].sort((a, b) => new Date(a.data) - new Date(b.data))
-  const subtotales = calcularSubtotales(excursionsForCalc)
+  // Usar contexto de todas las excursiones para calcular asistencias/ratios
+  const allExc = [...allExcursionsForContext, excursion].sort((a, b) => new Date(a.data) - new Date(b.data))
+  const subtotales = calcularSubtotalesParaExcursion(excursion, allExc)
 
   const excursionConSubtotales = {
     ...excursion,
@@ -45,10 +45,12 @@ async function deleteExcursion(id) {
 
 async function updateExcursion(id, fields, allExcursionsForContext = []) {
   // Calcular subtotales con la excursión actualizada
-  const excursionsForCalc = allExcursionsForContext
+  const allExc = allExcursionsForContext
     .map(e => e.id === id ? { ...e, ...fields } : e)
     .sort((a, b) => new Date(a.data) - new Date(b.data))
-  const subtotales = calcularSubtotales(excursionsForCalc)
+
+  const excursionActualizada = allExc.find(e => e.id === id)
+  const subtotales = calcularSubtotalesParaExcursion(excursionActualizada, allExc)
 
   const fieldsConSubtotales = {
     ...fields,
@@ -161,13 +163,93 @@ function calcularSaldos(excursions) {
   return calcularSaldos_V1(excursions)
 }
 
+// Calcular el delta (cambio) de una excursión específica en V1
+function calcularDeltaV1(excursion) {
+  const delta = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
+
+  const conductors = excursion.conductors ?? []
+  const passatgers = excursion.passatgers ?? []
+  const km = parseFloat(excursion.km) || 0
+  let nPasajeros = passatgers.length
+
+  if (conductors.length === 0) return delta
+
+  if (excursion.hayOtroConductor && excursion.pasajerosPorOtroConductor) {
+    nPasajeros -= parseInt(excursion.pasajerosPorOtroConductor)
+  }
+
+  for (const cid of conductors) {
+    if (delta[cid] !== undefined) delta[cid] -= km * nPasajeros
+  }
+  for (const uid of passatgers) {
+    if (delta[uid] !== undefined) delta[uid] += km
+  }
+
+  return delta
+}
+
+// Calcular el delta de una excursión específica en V2
+function calcularDeltaV2(excursion) {
+  const delta = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
+
+  const conductors = excursion.conductors ?? []
+  const passatgers = excursion.passatgers ?? []
+  const km = parseFloat(excursion.km) || 0
+  let nPasajeros = passatgers.length
+
+  if (conductors.length === 0) return delta
+
+  if (excursion.hayOtroConductor && excursion.pasajerosPorOtroConductor) {
+    nPasajeros -= parseInt(excursion.pasajerosPorOtroConductor)
+  }
+
+  for (const cid of conductors) {
+    if (delta[cid] !== undefined) delta[cid] -= km * nPasajeros
+  }
+  for (const uid of passatgers) {
+    if (delta[uid] !== undefined) delta[uid] += km
+  }
+
+  return delta
+}
+
+// Calcular el delta de una excursión en V3 (requiere contexto de asistencias)
+function calcularDeltaV3(excursion, asistencias, totalExcursiones) {
+  const deltaV2 = calcularDeltaV2(excursion)
+  const totalExc = totalExcursiones || 1
+
+  return Object.fromEntries(
+    USUARIOS.map(u => {
+      const n = asistencias[u.id] || 0
+      const ratio = n / totalExc
+      const factor = (100 - (ratio * 100)) / 100
+      const deltaV3 = deltaV2[u.id] * factor
+      return [u.id, deltaV3]
+    })
+  )
+}
+
+// Calcular los subtotales de una excursión específica dado el contexto completo
+function calcularSubtotalesParaExcursion(excursion, allExcursions) {
+  // Contar asistencias globales
+  const asistencias = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
+  for (const exc of allExcursions) {
+    const tots = [...(exc.conductors ?? []), ...(exc.passatgers ?? [])]
+    for (const uid of tots) {
+      if (asistencias[uid] !== undefined) asistencias[uid]++
+    }
+  }
+
+  return {
+    subtotal_variant1: calcularDeltaV1(excursion),
+    subtotal_variant2: calcularDeltaV2(excursion),
+    subtotal_variant3: calcularDeltaV3(excursion, asistencias, allExcursions.length),
+  }
+}
+
 // Calcular los 3 subtotales para guardar en la excursión
 function calcularSubtotales(excursions) {
-  return {
-    subtotal_variant1: calcularSaldos_V1(excursions),
-    subtotal_variant2: calcularSaldos_V2(excursions),
-    subtotal_variant3: calcularSaldos_V3(excursions),
-  }
+  return calcularSubtotalesParaExcursion(excursions[0], excursions)
 }
 
 function calcularAsistencies(excursions) {
