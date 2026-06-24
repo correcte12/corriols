@@ -64,7 +64,7 @@ async function updateExcursion(id, fields, allExcursionsForContext = []) {
 // ─── Lògica de saldos (3 variantes) ───────────────────────────────────────────
 
 // VARIANTE 1: Deuta de Quilòmetres (actual)
-// - Conductor: -(km × nº_passatgers)
+// - Conductor: -(km × pasajeros_por_conductor)
 // - Passatger: +km
 function calcularSaldos_V1(excursions) {
   const saldos = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
@@ -82,9 +82,13 @@ function calcularSaldos_V1(excursions) {
       nPasajeros -= parseInt(exc.pasajerosPorOtroConductor)
     }
 
-    // Conductors resten: -(km × nº_passatgers)
+    // Dividir pasajeros equitativamente entre conductores
+    const nConductores = conductors.length || 1
+    const pasajerosPorConductor = nPasajeros / nConductores
+
+    // Conductors resten: -(km × pasajeros_por_conductor)
     for (const cid of conductors) {
-      if (saldos[cid] !== undefined) saldos[cid] -= km * nPasajeros
+      if (saldos[cid] !== undefined) saldos[cid] -= km * pasajerosPorConductor
     }
 
     // Passatgers sumen: +km
@@ -97,7 +101,7 @@ function calcularSaldos_V1(excursions) {
 }
 
 // VARIANTE 2: Consumo de Plazas
-// - Conductor: -(km × (nº_passatgers - pasajeros_conductor_esporádico))
+// - Conductor: -(km × pasajeros_por_conductor)
 // - Passatger: +km
 function calcularSaldos_V2(excursions) {
   const saldos = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
@@ -115,9 +119,13 @@ function calcularSaldos_V2(excursions) {
       nPasajeros -= parseInt(exc.pasajerosPorOtroConductor)
     }
 
-    // Conductors resten: -(km × nº_passatgers_netos)
+    // Dividir pasajeros equitativamente entre conductores
+    const nConductores = conductors.length || 1
+    const pasajerosPorConductor = nPasajeros / nConductores
+
+    // Conductors resten: -(km × pasajeros_por_conductor)
     for (const cid of conductors) {
-      if (saldos[cid] !== undefined) saldos[cid] -= km * nPasajeros
+      if (saldos[cid] !== undefined) saldos[cid] -= km * pasajerosPorConductor
     }
 
     // Passatgers sumen: +km
@@ -178,8 +186,13 @@ function calcularDeltaV1(excursion) {
     nPasajeros -= parseInt(excursion.pasajerosPorOtroConductor)
   }
 
+  // Dividir pasajeros equitativamente entre conductores
+  const nConductores = conductors.length || 1
+  const pasajerosPorConductor = nPasajeros / nConductores
+
+  // Conductors resten: -(km × pasajeros_por_conductor)
   for (const cid of conductors) {
-    if (delta[cid] !== undefined) delta[cid] -= km * nPasajeros
+    if (delta[cid] !== undefined) delta[cid] -= km * pasajerosPorConductor
   }
   for (const uid of passatgers) {
     if (delta[uid] !== undefined) delta[uid] += km
@@ -203,8 +216,13 @@ function calcularDeltaV2(excursion) {
     nPasajeros -= parseInt(excursion.pasajerosPorOtroConductor)
   }
 
+  // Dividir pasajeros equitativamente entre conductores
+  const nConductores = conductors.length || 1
+  const pasajerosPorConductor = nPasajeros / nConductores
+
+  // Conductors resten: -(km × pasajeros_por_conductor)
   for (const cid of conductors) {
-    if (delta[cid] !== undefined) delta[cid] -= km * nPasajeros
+    if (delta[cid] !== undefined) delta[cid] -= km * pasajerosPorConductor
   }
   for (const uid of passatgers) {
     if (delta[uid] !== undefined) delta[uid] += km
