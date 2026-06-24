@@ -137,35 +137,6 @@ function calcularSaldos_V2(excursions) {
   return saldos
 }
 
-// VARIANTE 3: Consumo de Plazas + Ratio de Asistencia
-// - Calcula V2
-// - Ajusta por ratio de asistencia: factor = (100 - porcentaje_asistencia) / 100
-function calcularSaldos_V3(excursions) {
-  const saldosV2 = calcularSaldos_V2(excursions)
-  const asistencias = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
-
-  // Contar asistencias
-  for (const exc of excursions) {
-    const tots = [...(exc.conductors ?? []), ...(exc.passatgers ?? [])]
-    for (const uid of tots) {
-      if (asistencias[uid] !== undefined) asistencias[uid]++
-    }
-  }
-
-  const totalExcursiones = excursions.length || 1
-
-  // Aplicar factor de asistencia a los saldos de V2
-  return Object.fromEntries(
-    USUARIOS.map(u => {
-      const n = asistencias[u.id] || 0
-      const ratio = n / totalExcursiones
-      const factor = (100 - (ratio * 100)) / 100
-      const saldoFinal = saldosV2[u.id] * factor
-      return [u.id, saldoFinal]
-    })
-  )
-}
-
 // Para compatibilidad, calcularSaldos() usa V1 por defecto
 function calcularSaldos(excursions) {
   return calcularSaldos_V1(excursions)
@@ -231,22 +202,6 @@ function calcularDeltaV2(excursion) {
   return delta
 }
 
-// Calcular el delta de una excursión en V3 (requiere contexto de asistencias)
-function calcularDeltaV3(excursion, asistencias, totalExcursiones) {
-  const deltaV2 = calcularDeltaV2(excursion)
-  const totalExc = totalExcursiones || 1
-
-  return Object.fromEntries(
-    USUARIOS.map(u => {
-      const n = asistencias[u.id] || 0
-      const ratio = n / totalExc
-      const factor = (100 - (ratio * 100)) / 100
-      const deltaV3 = deltaV2[u.id] * factor
-      return [u.id, deltaV3]
-    })
-  )
-}
-
 // Calcular los subtotales de una excursión específica dado el contexto completo
 function calcularSubtotalesParaExcursion(excursion, allExcursions) {
   // Contar asistencias globales
@@ -261,7 +216,6 @@ function calcularSubtotalesParaExcursion(excursion, allExcursions) {
   return {
     subtotal_variant1: calcularDeltaV1(excursion),
     subtotal_variant2: calcularDeltaV2(excursion),
-    subtotal_variant3: calcularDeltaV3(excursion, asistencias, allExcursions.length),
   }
 }
 
@@ -306,7 +260,6 @@ function Dashboard({ excursions, saldos, asistencies, ratios, currentUser, varia
   const variantLabels = {
     v1: 'Variante 1: Deuta de Quilòmetres',
     v2: 'Variante 2: Consumo de Plazas',
-    v3: 'Variante 3: Consumo + Ratio Asistencia',
   }
 
   return (
@@ -316,7 +269,7 @@ function Dashboard({ excursions, saldos, asistencies, ratios, currentUser, varia
           Mètode de càlcul
         </label>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          {['v1', 'v2', 'v3'].map(v => (
+          {['v1', 'v2'].map(v => (
             <label key={v} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: 'var(--exc-text)' }}>
               <input type="radio" name="variant" value={v} checked={variant === v} onChange={e => onVariantChange(e.target.value)} />
               <span style={{ fontSize: '0.9rem', color: 'var(--exc-text)' }}>{variantLabels[v]}</span>
@@ -757,7 +710,6 @@ function Historial({ excursions, onDelete, onSaved }) {
 function Comparativa({ excursions }) {
   const v1Saldos = calcularSaldos_V1(excursions)
   const v2Saldos = calcularSaldos_V2(excursions)
-  const v3Saldos = calcularSaldos_V3(excursions)
 
   return (
     <div>
@@ -771,14 +723,12 @@ function Comparativa({ excursions }) {
               <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 600, color: 'var(--exc-text)' }}>Usuari</th>
               <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 600, color: 'var(--exc-text)' }}>V1: Deuta</th>
               <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 600, color: 'var(--exc-text)' }}>V2: Consum</th>
-              <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 600, color: 'var(--exc-text)' }}>V3: Consum+Ratio</th>
             </tr>
           </thead>
           <tbody>
             {USUARIOS.map(u => {
               const v1 = v1Saldos[u.id]
               const v2 = v2Saldos[u.id]
-              const v3 = v3Saldos[u.id]
               return (
                 <tr key={u.id} style={{ borderBottom: '1px solid var(--exc-border)' }}>
                   <td style={{ padding: '0.75rem', fontWeight: 500 }}>{u.nombre}</td>
@@ -787,9 +737,6 @@ function Comparativa({ excursions }) {
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'center', color: v2 < 0 ? '#d32f2f' : v2 > 0 ? '#388e3c' : '#666' }}>
                     {v2 > 0 ? '+' : ''}{v2.toFixed(0)}
-                  </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'center', color: v3 < 0 ? '#d32f2f' : v3 > 0 ? '#388e3c' : '#666' }}>
-                    {v3 > 0 ? '+' : ''}{v3.toFixed(0)}
                   </td>
                 </tr>
               )
@@ -804,7 +751,7 @@ function Comparativa({ excursions }) {
           <div style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--exc-accent)' }}>
             {e.data} — {e.destino} ({parseFloat(e.km).toFixed(0)} km)
           </div>
-          <div style={{ fontSize: '0.85rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+          <div style={{ fontSize: '0.85rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
             <div>
               <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-accent)' }}>V1: Deuta</div>
               {USUARIOS.map(u => (
@@ -818,14 +765,6 @@ function Comparativa({ excursions }) {
               {USUARIOS.map(u => (
                 <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
                   {u.nombre}: {e.subtotal_variant2 ? (e.subtotal_variant2[u.id] > 0 ? '+' : '') + e.subtotal_variant2[u.id].toFixed(0) : '—'}
-                </div>
-              ))}
-            </div>
-            <div>
-              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-accent)' }}>V3: Consum+Ratio</div>
-              {USUARIOS.map(u => (
-                <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
-                  {u.nombre}: {e.subtotal_variant3 ? (e.subtotal_variant3[u.id] > 0 ? '+' : '') + e.subtotal_variant3[u.id].toFixed(0) : '—'}
                 </div>
               ))}
             </div>
@@ -897,46 +836,14 @@ function Explicacio() {
 
       <div style={{ marginBottom: '2rem' }}>
         <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--exc-text)' }}>
-          Variante 3: Consumo + Ratio de Asistencia
-        </h3>
-        <div style={{ background: 'var(--exc-bg-secondary, #f5f5f5)', padding: '1rem', borderRadius: '6px', marginBottom: '1rem' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: 1.5, color: 'var(--exc-accent)' }}>
-            <strong>Fórmula:</strong>
-          </p>
-          <ol style={{ margin: '0.5rem 0 0.5rem 1.5rem', padding: 0, fontSize: '0.95rem', lineHeight: 1.6, color: 'var(--exc-muted)' }}>
-            <li>Calcula V2 (Consumo de Plazas)</li>
-            <li>Calcula ratio asistència: ratio = asistències / total excursions</li>
-            <li>Factor multiplicador: factor = (100 − (ratio × 100)) / 100</li>
-            <li>Saldo final: saldo_V2 × factor</li>
-          </ol>
-          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
-            <strong>Exemple:</strong>
-          </p>
-          <ul style={{ margin: '0.5rem 0 0 1.5rem', padding: 0, fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
-            <li>Total excursions: 20</li>
-            <li>Tu has assistit: 15 (ratio = 75%)</li>
-            <li>Factor: (100 − 75) / 100 = 0.25</li>
-            <li>Si la V2 t'dona +200 → V3 = 200 × 0.25 = <strong>+50</strong></li>
-          </ul>
-          <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
-            <strong>Interpretació:</strong> A menor asistència, major multiplicador. Penalitza (o equilibra) a qui assisteix esporàdicament, evitant saldos massa alts/baixos.
-          </p>
-        </div>
-      </div>
-
-      <div style={{ marginBottom: '2rem' }}>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--exc-text)' }}>
-          Quan usar cada una?
+          Diferència entre les dues
         </h3>
         <div style={{ background: 'var(--exc-bg-secondary, #f5f5f5)', padding: '1rem', borderRadius: '6px' }}>
           <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', color: 'var(--exc-muted)' }}>
             <strong>V1 (Deuta):</strong> Més simple i intuitiva. Cada km pesa igual, el que "regales" es exactament lo que els altres "reben".
           </p>
-          <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', color: 'var(--exc-muted)' }}>
-            <strong>V2 (Consum):</strong> Enfocada al concepte de "consumo de recursos". Qui condueix més, més resten els seus quilòmetres.
-          </p>
           <p style={{ margin: '0', fontSize: '0.95rem', color: 'var(--exc-muted)' }}>
-            <strong>V3 (Consum+Ratio):</strong> Per grups on la asistencia és irregular. Evita que qui sempre va acumuli saldos massa grans.
+            <strong>V2 (Consum):</strong> Enfocada al concepte de "consumo de recursos". Equivalent matemàticament a V1 amb la mateixa fórmula, pero amb interpretació diferent.
           </p>
         </div>
       </div>
@@ -956,12 +863,11 @@ export default function ExcursionsPage() {
   const [excursions, setExcursions] = useState([])
   const [loading,    setLoading]    = useState(false)
   const [view,       setView]       = useState('Resum')
-  const [variant,    setVariant]    = useState('v1')  // v1, v2, v3
+  const [variant,    setVariant]    = useState('v1')  // v1, v2
 
   const saldos     = useMemo(() => {
     switch(variant) {
       case 'v2': return calcularSaldos_V2(excursions)
-      case 'v3': return calcularSaldos_V3(excursions)
       default: return calcularSaldos_V1(excursions)
     }
   }, [excursions, variant])
