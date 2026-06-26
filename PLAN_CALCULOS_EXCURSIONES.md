@@ -121,6 +121,24 @@ Al insertar/editar excursión:
 
 ---
 
+## Funcionalidades Adicionales
+
+### Edición Manual de Deltas
+Desde la pestaña "Comparativa", en cada tarjeta de "Evolció per sortida" hay un botón "Editar" que permite:
+- Modificar manualmente los deltas V1 y V2 de una excursión específica
+- Modal con tabla: Usuario | V1 | V2 (campos editables)
+- Muestra totales V1 y V2 para verificación
+- Al guardar, se actualiza la BD y se recalculan todos los subtotales acumulados
+
+### Subtotales Acumulados por Salida
+En cada tarjeta de "Evolció per sortida" se muestran:
+1. **Deltas** (cambio de esa salida específica) en V1 y V2
+2. **Subtotales** (saldos acumulados hasta esa fecha) en V1 y V2
+   - Calculados sumando todos los deltas de las excursiones hasta esa fecha
+   - Se actualizan automáticamente cuando se edita una salida
+
+---
+
 ## Estado de Implementación
 - [x] Migración BD (agregar 2 campos JSONB para subtotales)
 - [x] Función calcularSaldos_V1, V2 (para dashboard global)
@@ -134,6 +152,8 @@ Al insertar/editar excursión:
 - [x] Aplicar migración BD en Supabase
 - [x] Fixes de contraste en UI
 - [x] Eliminar Variante 3 (ratio de asistencia)
+- [x] Modal de edición manual de deltas (casos esporádicos)
+- [x] Subtotales acumulados por salida en Comparativa
 - [x] Build de producción (`npm run build`)
 
 **✓ Implementación completada**

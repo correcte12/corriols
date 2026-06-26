@@ -43,6 +43,14 @@ async function deleteExcursion(id) {
   if (error) throw error
 }
 
+async function updateSubtotals(id, subtotal_variant1, subtotal_variant2) {
+  const { error } = await supabase
+    .from('grup_excursions')
+    .update({ subtotal_variant1, subtotal_variant2 })
+    .eq('id', id)
+  if (error) throw error
+}
+
 async function updateExcursion(id, fields, allExcursionsForContext = []) {
   // Calcular subtotales con la excursión actualizada
   const allExc = allExcursionsForContext
@@ -140,6 +148,32 @@ function calcularSaldos_V2(excursions) {
 // Para compatibilidad, calcularSaldos() usa V1 por defecto
 function calcularSaldos(excursions) {
   return calcularSaldos_V1(excursions)
+}
+
+// Calcular saldos acumulados hasta una fecha específica (usando valores guardados)
+function calcularSaldosHastaFecha(excursions, fechaLimite) {
+  const saldosV1 = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
+  const saldosV2 = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
+  const excOrdenadas = [...excursions].sort((a, b) => new Date(a.data) - new Date(b.data))
+
+  for (const exc of excOrdenadas) {
+    if (new Date(exc.data) > new Date(fechaLimite)) break
+
+    // Usar los valores guardados en la BD (que pueden haber sido editados manualmente)
+    if (exc.subtotal_variant1) {
+      for (const [uid, delta] of Object.entries(exc.subtotal_variant1)) {
+        if (saldosV1[uid] !== undefined) saldosV1[uid] += delta
+      }
+    }
+
+    if (exc.subtotal_variant2) {
+      for (const [uid, delta] of Object.entries(exc.subtotal_variant2)) {
+        if (saldosV2[uid] !== undefined) saldosV2[uid] += delta
+      }
+    }
+  }
+
+  return { v1: saldosV1, v2: saldosV2 }
 }
 
 // Calcular el delta (cambio) de una excursión específica en V1
@@ -707,9 +741,110 @@ function Historial({ excursions, onDelete, onSaved }) {
   )
 }
 
-function Comparativa({ excursions }) {
+function EditarDeltasModal({ excursion, onClose, onSave }) {
+  const [editedV1, setEditedV1] = useState(excursion.subtotal_variant1 ? { ...excursion.subtotal_variant1 } : Object.fromEntries(USUARIOS.map(u => [u.id, 0])))
+  const [editedV2, setEditedV2] = useState(excursion.subtotal_variant2 ? { ...excursion.subtotal_variant2 } : Object.fromEntries(USUARIOS.map(u => [u.id, 0])))
+  const [isSaving, setIsSaving] = useState(false)
+
+  const totalV1 = Object.values(editedV1).reduce((a, b) => a + b, 0)
+  const totalV2 = Object.values(editedV2).reduce((a, b) => a + b, 0)
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      await updateSubtotals(excursion.id, editedV1, editedV2)
+      onSave()
+      onClose()
+    } catch (error) {
+      alert('Error al guardar: ' + error.message)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+      <div style={{ background: '#1e293b', borderRadius: '8px', padding: '2rem', maxWidth: '600px', width: '90%', maxHeight: '80vh', overflowY: 'auto', border: '1px solid var(--exc-border)' }}>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.2rem', fontWeight: 600, color: 'var(--exc-text)' }}>
+            Editar deltas
+          </h2>
+          <div style={{ fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
+            {excursion.data} — {excursion.destino} ({parseFloat(excursion.km).toFixed(0)} km)
+          </div>
+        </div>
+
+        <div style={{ overflowX: 'auto', marginBottom: '1.5rem' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+            <thead>
+              <tr style={{ background: '#0f172a', borderBottom: '2px solid var(--exc-border)' }}>
+                <th style={{ padding: '0.5rem', textAlign: 'left', fontWeight: 600, color: 'var(--exc-text)' }}>Usuari</th>
+                <th style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 600, color: 'var(--exc-text)' }}>V1: Deuta</th>
+                <th style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 600, color: 'var(--exc-text)' }}>V2: Consum</th>
+              </tr>
+            </thead>
+            <tbody>
+              {USUARIOS.map(u => (
+                <tr key={u.id} style={{ borderBottom: '1px solid var(--exc-border)' }}>
+                  <td style={{ padding: '0.5rem', fontWeight: 500, color: 'var(--exc-text)' }}>{u.nombre}</td>
+                  <td style={{ padding: '0.5rem', textAlign: 'center' }}>
+                    <input
+                      type="number"
+                      value={editedV1[u.id] || 0}
+                      onChange={e => setEditedV1({ ...editedV1, [u.id]: parseFloat(e.target.value) || 0 })}
+                      style={{ width: '60px', padding: '0.25rem', textAlign: 'center', background: '#0f172a', color: 'var(--exc-text)', border: '1px solid var(--exc-border)', borderRadius: '4px' }}
+                    />
+                  </td>
+                  <td style={{ padding: '0.5rem', textAlign: 'center' }}>
+                    <input
+                      type="number"
+                      value={editedV2[u.id] || 0}
+                      onChange={e => setEditedV2({ ...editedV2, [u.id]: parseFloat(e.target.value) || 0 })}
+                      style={{ width: '60px', padding: '0.25rem', textAlign: 'center', background: '#0f172a', color: 'var(--exc-text)', border: '1px solid var(--exc-border)', borderRadius: '4px' }}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{ padding: '1rem', background: '#0f172a', borderRadius: '4px', marginBottom: '1.5rem', fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
+          <div>Total V1: <strong style={{ color: 'var(--exc-accent)' }}>{totalV1.toFixed(0)}</strong></div>
+          <div>Total V2: <strong style={{ color: 'var(--exc-accent)' }}>{totalV2.toFixed(0)}</strong></div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+          <button
+            onClick={onClose}
+            disabled={isSaving}
+            style={{ padding: '0.5rem 1rem', background: '#475569', color: 'var(--exc-text)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 500 }}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            style={{ padding: '0.5rem 1rem', background: 'var(--exc-accent)', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 600 }}
+          >
+            {isSaving ? 'Guardando...' : 'Guardar cambios'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Comparativa({ excursions, onExcursionChange }) {
   const v1Saldos = calcularSaldos_V1(excursions)
   const v2Saldos = calcularSaldos_V2(excursions)
+  const [editingExcursionId, setEditingExcursionId] = useState(null)
+
+  const excursionToEdit = excursions.find(e => e.id === editingExcursionId)
+
+  const handleSaveEdit = async () => {
+    await onExcursionChange()
+  }
 
   return (
     <div>
@@ -746,31 +881,68 @@ function Comparativa({ excursions }) {
       </div>
 
       <div className="exc-section-title" style={{ marginTop: '2rem' }}>Evolució per sortida</div>
-      {excursions.slice().reverse().map(e => (
-        <div key={e.id} style={{ padding: '1rem', background: 'var(--exc-bg-secondary, #f5f5f5)', borderRadius: '6px', marginBottom: '0.75rem' }}>
-          <div style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--exc-accent)' }}>
-            {e.data} — {e.destino} ({parseFloat(e.km).toFixed(0)} km)
-          </div>
-          <div style={{ fontSize: '0.85rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-            <div>
-              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-accent)' }}>V1: Deuta</div>
-              {USUARIOS.map(u => (
-                <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
-                  {u.nombre}: {e.subtotal_variant1 ? (e.subtotal_variant1[u.id] > 0 ? '+' : '') + e.subtotal_variant1[u.id].toFixed(0) : '—'}
-                </div>
-              ))}
+      {excursions.map(e => {
+        const subtotales = calcularSaldosHastaFecha(excursions, e.data)
+        return (
+          <div key={e.id} style={{ padding: '1rem', background: 'var(--exc-bg-secondary, #f5f5f5)', borderRadius: '6px', marginBottom: '0.75rem', position: 'relative' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+              <div style={{ fontWeight: 600, color: 'var(--exc-accent)' }}>
+                {e.data} — {e.destino} ({parseFloat(e.km).toFixed(0)} km)
+              </div>
+              <button
+                onClick={() => setEditingExcursionId(e.id)}
+                style={{ padding: '0.25rem 0.75rem', background: 'var(--exc-accent)', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 500, fontSize: '0.8rem' }}
+              >
+                Editar
+              </button>
             </div>
-            <div>
-              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-accent)' }}>V2: Consum</div>
-              {USUARIOS.map(u => (
-                <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
-                  {u.nombre}: {e.subtotal_variant2 ? (e.subtotal_variant2[u.id] > 0 ? '+' : '') + e.subtotal_variant2[u.id].toFixed(0) : '—'}
-                </div>
-              ))}
+            <div style={{ fontSize: '0.85rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+              <div>
+                <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-accent)' }}>V1: Deuta</div>
+                {USUARIOS.map(u => (
+                  <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
+                    {u.nombre}: {e.subtotal_variant1 ? (e.subtotal_variant1[u.id] > 0 ? '+' : '') + e.subtotal_variant1[u.id].toFixed(0) : '—'}
+                  </div>
+                ))}
+              </div>
+              <div>
+                <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-accent)' }}>V2: Consum</div>
+                {USUARIOS.map(u => (
+                  <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
+                    {u.nombre}: {e.subtotal_variant2 ? (e.subtotal_variant2[u.id] > 0 ? '+' : '') + e.subtotal_variant2[u.id].toFixed(0) : '—'}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{ fontSize: '0.85rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--exc-border)' }}>
+              <div>
+                <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-accent)' }}>Subtotal V1</div>
+                {USUARIOS.map(u => (
+                  <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
+                    {u.nombre}: {(subtotales.v1[u.id] > 0 ? '+' : '') + subtotales.v1[u.id].toFixed(0)}
+                  </div>
+                ))}
+              </div>
+              <div>
+                <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--exc-accent)' }}>Subtotal V2</div>
+                {USUARIOS.map(u => (
+                  <div key={u.id} style={{ fontSize: '0.8rem', color: 'var(--exc-muted)' }}>
+                    {u.nombre}: {(subtotales.v2[u.id] > 0 ? '+' : '') + subtotales.v2[u.id].toFixed(0)}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
+
+      {excursionToEdit && (
+        <EditarDeltasModal
+          excursion={excursionToEdit}
+          onClose={() => setEditingExcursionId(null)}
+          onSave={handleSaveEdit}
+        />
+      )}
     </div>
   )
 }
@@ -961,7 +1133,7 @@ export default function ExcursionsPage() {
         {!loading && view === 'Resum'        && <Dashboard excursions={excursions} saldos={saldos} asistencies={asistencies} ratios={ratios} currentUser={loggedUser} variant={variant} onVariantChange={setVariant} />}
         {!loading && view === 'Nova sortida' && <NouaExcursio onSaved={loadData} excursions={excursions} />}
         {!loading && view === 'Historial'    && <Historial excursions={excursions} onDelete={handleDelete} onSaved={loadData} />}
-        {!loading && view === 'Comparativa'  && <Comparativa excursions={excursions} />}
+        {!loading && view === 'Comparativa'  && <Comparativa excursions={excursions} onExcursionChange={loadData} />}
         {!loading && view === 'Explicació'   && <Explicacio />}
       </div>
     </div>
