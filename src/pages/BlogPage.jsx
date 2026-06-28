@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { listArticles } from '../lib/blogStorage'
+import { listArticles, listCategories } from '../lib/blogStorage'
 import './BlogPage.css'
 
 const formatDate = (iso) =>
@@ -16,6 +16,8 @@ const formatDate = (iso) =>
 export default function BlogPage() {
   const { user } = useAuth()
   const [articles, setArticles] = useState([])
+  const [categories, setCategories] = useState([])
+  const [selectedCategory, setSelectedCategory] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -24,7 +26,12 @@ export default function BlogPage() {
       setLoading(true)
       setError('')
       try {
-        setArticles(await listArticles({ publishedOnly: true }))
+        const [articlesData, categoriesData] = await Promise.all([
+          listArticles({ publishedOnly: true, categoryId: selectedCategory }),
+          listCategories(),
+        ])
+        setArticles(articlesData)
+        setCategories(categoriesData)
       } catch (err) {
         setError(err.message || "No s'ha pogut carregar el blog.")
       } finally {
@@ -32,7 +39,7 @@ export default function BlogPage() {
       }
     }
     load()
-  }, [])
+  }, [selectedCategory])
 
   return (
     <div className="blog-page">
@@ -46,6 +53,27 @@ export default function BlogPage() {
           </Link>
         )}
       </div>
+
+      {categories.length > 0 && (
+        <div className="blog-categories-filter">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`blog-category-btn${selectedCategory === null ? ' active' : ''}`}
+          >
+            Tots
+          </button>
+          {categories.map(c => (
+            <button
+              key={c.id}
+              onClick={() => setSelectedCategory(c.id)}
+              className={`blog-category-btn${selectedCategory === c.id ? ' active' : ''}`}
+              style={{ '--category-color': c.color }}
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {loading && <div className="blog-status">Carregant articles...</div>}
       {!loading && error && <div className="blog-error">{error}</div>}

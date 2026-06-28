@@ -12,6 +12,10 @@ import {
   setArticlePublished,
   uploadBlogImage,
   slugify,
+  listCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
 } from '../lib/blogStorage'
 import './BlogAdminPage.css'
 
@@ -28,18 +32,30 @@ const EMPTY_FORM = {
   source_url: '',
   published: false,
   published_at: '',
+  category_id: null,
+}
+
+const EMPTY_CATEGORY = {
+  name: '',
+  slug: '',
+  description: '',
+  color: '#3b82f6',
 }
 
 export default function BlogAdminPage() {
   const { user, loading: authLoading } = useAuth()
 
   const [articles, setArticles] = useState([])
+  const [categories, setCategories] = useState([])
   const [loadingList, setLoadingList] = useState(true)
   const [form, setForm] = useState(EMPTY_FORM)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [uploadingCover, setUploadingCover] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
+  const [showCategoryForm, setShowCategoryForm] = useState(false)
+  const [categoryForm, setCategoryForm] = useState(EMPTY_CATEGORY)
+  const [editingCategoryId, setEditingCategoryId] = useState(null)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const coverInputRef = useRef(null)
@@ -56,8 +72,20 @@ export default function BlogAdminPage() {
     }
   }
 
+  const loadCategories = async () => {
+    try {
+      const data = await listCategories()
+      setCategories(data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   useEffect(() => {
-    if (user) loadArticles()
+    if (user) {
+      loadArticles()
+      loadCategories()
+    }
   }, [user])
 
   if (authLoading) return null
@@ -89,6 +117,7 @@ export default function BlogAdminPage() {
         source_url: full.source_url || '',
         published: full.published || false,
         published_at: (full.published_at || full.created_at || '').slice(0, 10),
+        category_id: full.category_id || null,
       })
       setEditing(true)
     } catch (err) {
@@ -171,6 +200,58 @@ export default function BlogAdminPage() {
     }
   }
 
+  const handleSaveCategory = async () => {
+    if (!categoryForm.name.trim()) {
+      setError('El nom de la categoria és obligatori.')
+      return
+    }
+    setError('')
+    try {
+      if (editingCategoryId) {
+        await updateCategory(editingCategoryId, categoryForm)
+        flashSuccess('Categoria actualitzada.')
+      } else {
+        await createCategory(categoryForm)
+        flashSuccess('Categoria creada.')
+      }
+      setCategoryForm(EMPTY_CATEGORY)
+      setEditingCategoryId(null)
+      setShowCategoryForm(false)
+      await loadCategories()
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  const handleDeleteCategory = async (category) => {
+    if (!window.confirm(`Eliminar la categoria "${category.name}"?`)) return
+    setError('')
+    try {
+      await deleteCategory(category.id)
+      await loadCategories()
+      flashSuccess('Categoria eliminada.')
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  const startEditCategory = (category) => {
+    setCategoryForm({
+      name: category.name,
+      slug: category.slug,
+      description: category.description || '',
+      color: category.color || '#3b82f6',
+    })
+    setEditingCategoryId(category.id)
+    setShowCategoryForm(true)
+  }
+
+  const cancelCategoryForm = () => {
+    setCategoryForm(EMPTY_CATEGORY)
+    setEditingCategoryId(null)
+    setShowCategoryForm(false)
+  }
+
   return (
     <div className={`badmin-page${editing ? ' badmin-page--editing' : ''}`}>
       <div className="badmin-header">
@@ -191,6 +272,95 @@ export default function BlogAdminPage() {
       {!editing ? (
         /* ---------- Vista llista ---------- */
         <div className="badmin-list-view">
+          {/* Gestió de categories */}
+          <div className="badmin-card" style={{ marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 className="badmin-card-title">Categories ({categories.length})</h3>
+              {!showCategoryForm && (
+                <button onClick={() => setShowCategoryForm(true)} className="badmin-btn badmin-btn-secondary">
+                  + Nova categoria
+                </button>
+              )}
+            </div>
+
+            {showCategoryForm && (
+              <div style={{ padding: '1rem', background: '#f9fafb', borderRadius: '6px', marginBottom: '1rem' }}>
+                <div className="badmin-field">
+                  <label>Nom *</label>
+                  <input
+                    type="text"
+                    value={categoryForm.name}
+                    onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
+                    placeholder="Ex: Salud, Naturales, Tips"
+                    className="badmin-input"
+                  />
+                </div>
+                <div className="badmin-field">
+                  <label>Descripció</label>
+                  <textarea
+                    value={categoryForm.description}
+                    onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
+                    placeholder="Descripció (opcional)"
+                    className="badmin-input"
+                    rows={2}
+                  />
+                </div>
+                <div className="badmin-field">
+                  <label>Color</label>
+                  <input
+                    type="color"
+                    value={categoryForm.color}
+                    onChange={(e) => setCategoryForm({ ...categoryForm, color: e.target.value })}
+                    className="badmin-input"
+                    style={{ height: '2.5rem' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button onClick={handleSaveCategory} className="badmin-btn badmin-btn-primary">
+                    Desar
+                  </button>
+                  <button onClick={cancelCategoryForm} className="badmin-btn badmin-btn-muted">
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {categories.length === 0 ? (
+              <p className="badmin-muted">Encara no hi ha categories.</p>
+            ) : (
+              <ul className="badmin-list">
+                {categories.map((c) => (
+                  <li key={c.id} className="badmin-list-item">
+                    <div className="badmin-list-main">
+                      <p className="badmin-list-title">
+                        <span style={{ display: 'inline-block', width: '12px', height: '12px', background: c.color, borderRadius: '2px', marginRight: '0.5rem' }}></span>
+                        {c.name}
+                      </p>
+                      {c.description && <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>{c.description}</p>}
+                    </div>
+                    <div className="badmin-list-actions">
+                      <button
+                        onClick={() => startEditCategory(c)}
+                        className="badmin-btn-icon"
+                        title="Editar"
+                      >
+                        ✎
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCategory(c)}
+                        className="badmin-btn-icon badmin-btn-danger"
+                        title="Eliminar"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           <div className="badmin-list-toolbar">
             <h2 className="badmin-card-title">Articles ({articles.length})</h2>
             <div className="badmin-toolbar-actions">
@@ -317,6 +487,20 @@ export default function BlogAdminPage() {
                   onChange={(e) => updateField('published_at', e.target.value)}
                   className="badmin-input"
                 />
+              </div>
+
+              <div className="badmin-card">
+                <h3 className="badmin-card-title">Categoria</h3>
+                <select
+                  value={form.category_id || ''}
+                  onChange={(e) => updateField('category_id', e.target.value || null)}
+                  className="badmin-input"
+                >
+                  <option value="">— Sense categoria —</option>
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="badmin-card">

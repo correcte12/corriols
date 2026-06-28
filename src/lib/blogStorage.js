@@ -7,7 +7,7 @@ export const getBlogBucketName = () =>
 
 // Camps que es retornen a la llista (sense el cos sencer, per estalviar dades)
 const LIST_FIELDS =
-  'id, title, slug, excerpt, cover_url, original_author, source_url, published, published_at, created_at, updated_at'
+  'id, title, slug, excerpt, cover_url, original_author, source_url, published, published_at, created_at, updated_at, category_id'
 
 export const slugify = (text) =>
   (text || '')
@@ -24,13 +24,14 @@ const mapError = (action, error) =>
   new Error(`${action}: ${error?.message || 'Error desconegut de Supabase.'}`)
 
 // Llista d'articles. Per defecte només publicats (vista pública).
-export const listArticles = async ({ publishedOnly = true } = {}) => {
+export const listArticles = async ({ publishedOnly = true, categoryId = null } = {}) => {
   let query = supabase
     .from(TABLE)
     .select(LIST_FIELDS)
     .order('published_at', { ascending: false, nullsFirst: false })
 
   if (publishedOnly) query = query.eq('published', true)
+  if (categoryId) query = query.eq('category_id', categoryId)
 
   const { data, error } = await query
   if (error) throw mapError('No s\'han pogut carregar els articles', error)
@@ -91,6 +92,7 @@ export const createArticle = async (payload, authorId) => {
       published: payload.published ?? false,
       published_at: payload.published_at || null,
       author_id: authorId || null,
+      category_id: payload.category_id || null,
     })
     .select(LIST_FIELDS)
     .single()
@@ -109,6 +111,7 @@ export const updateArticle = async (id, payload) => {
     source_url: payload.source_url || null,
     published: payload.published ?? false,
     published_at: payload.published_at || null,
+    category_id: payload.category_id || null,
     updated_at: new Date().toISOString(),
   }
 
@@ -167,6 +170,80 @@ export const uploadBlogImage = async (file) => {
 
   const { data } = supabase.storage.from(bucket).getPublicUrl(path)
   return { url: data.publicUrl, path }
+}
+
+// ─── Gestió de categories ──────────────────────────────────────────────────
+
+export const listCategories = async () => {
+  const { data, error } = await supabase
+    .from('blog_categories')
+    .select('*')
+    .order('name', { ascending: true })
+  if (error) throw mapError('No s\'han pogut carregar les categories', error)
+  return data || []
+}
+
+export const createCategory = async (payload) => {
+  const slug = await ensureUniqueCategorySlug(slugify(payload.slug || payload.name))
+
+  const { data, error } = await supabase
+    .from('blog_categories')
+    .insert({
+      name: payload.name,
+      slug,
+      description: payload.description || null,
+      color: payload.color || '#3b82f6',
+    })
+    .select()
+    .single()
+
+  if (error) throw mapError('No s\'ha pogut crear la categoria', error)
+  return data
+}
+
+export const updateCategory = async (id, payload) => {
+  let updateData = {
+    name: payload.name,
+    description: payload.description || null,
+    color: payload.color || '#3b82f6',
+  }
+
+  if (payload.slug) {
+    updateData.slug = await ensureUniqueCategorySlug(slugify(payload.slug), id)
+  }
+
+  const { data, error } = await supabase
+    .from('blog_categories')
+    .update(updateData)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw mapError('No s\'ha pogut desar la categoria', error)
+  return data
+}
+
+export const deleteCategory = async (id) => {
+  const { error } = await supabase
+    .from('blog_categories')
+    .delete()
+    .eq('id', id)
+  if (error) throw mapError('No s\'ha pogut eliminar la categoria', error)
+}
+
+const ensureUniqueCategorySlug = async (baseSlug, ignoreId = null) => {
+  const base = baseSlug || `category-${Date.now()}`
+  let candidate = base
+  let suffix = 2
+  while (true) {
+    let query = supabase.from('blog_categories').select('id').eq('slug', candidate)
+    if (ignoreId) query = query.neq('id', ignoreId)
+    const { data, error } = await query.maybeSingle()
+    if (error) throw mapError('No s\'ha pogut validar el slug de categoria', error)
+    if (!data) return candidate
+    candidate = `${base}-${suffix}`
+    suffix += 1
+  }
 }
 
 // ─── Importació d'artícles externs ─────────────────────────────────────────
