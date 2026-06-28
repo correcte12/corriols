@@ -26,7 +26,10 @@
       "Bash(git commit -m 'fix: permitir conductor esporádico sin conductor registrado *)",
       "Bash(git commit -m 'feat: cambiar a sistema de '\\\\''deuda de quilòmetres'\\\\'' *)",
       "Bash(git commit -m 'docs: actualizar documentación del módulo Dijous d'\\\\''Excursió *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(npm list *)",
+      "PowerShell(Start-Process \"http://localhost:5173\")"
     ]
   }
 }

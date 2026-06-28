@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import ArticleEditor from '../components/blog/ArticleEditor'
+import ImportArticlesModal from '../components/blog/ImportArticlesModal'
 import {
   listArticles,
   getArticleById,
@@ -38,6 +39,7 @@ export default function BlogAdminPage() {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [uploadingCover, setUploadingCover] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const coverInputRef = useRef(null)
@@ -191,9 +193,14 @@ export default function BlogAdminPage() {
         <div className="badmin-list-view">
           <div className="badmin-list-toolbar">
             <h2 className="badmin-card-title">Articles ({articles.length})</h2>
-            <button onClick={startNew} className="badmin-btn badmin-btn-primary">
-              + Nou article
-            </button>
+            <div className="badmin-toolbar-actions">
+              <button onClick={() => setShowImportModal(true)} className="badmin-btn badmin-btn-secondary">
+                📥 Importar
+              </button>
+              <button onClick={startNew} className="badmin-btn badmin-btn-primary">
+                + Nou article
+              </button>
+            </div>
           </div>
           <div className="badmin-card">
             {loadingList ? (
@@ -372,6 +379,17 @@ export default function BlogAdminPage() {
             </aside>
           </div>
         </div>
+      )}
+
+      {showImportModal && (
+        <ImportArticlesModal
+          onClose={() => setShowImportModal(false)}
+          onImported={() => {
+            loadArticles()
+            flashSuccess('Articles importats com a esborranys.')
+          }}
+          userId={user.id}
+        />
       )}
     </div>
   )

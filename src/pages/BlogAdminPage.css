@@ -82,6 +82,11 @@
   margin: 0;
 }
 
+.badmin-toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
 /* ---- Vista editor ---- */
 .badmin-editor-bar {
   display: flex;

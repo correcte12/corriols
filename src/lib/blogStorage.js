@@ -168,3 +168,55 @@ export const uploadBlogImage = async (file) => {
   const { data } = supabase.storage.from(bucket).getPublicUrl(path)
   return { url: data.publicUrl, path }
 }
+
+// ─── Importació d'artícles externs ─────────────────────────────────────────
+
+// Obtenir artícles de Movethera (WordPress REST API)
+export const listMovetheraArticles = async () => {
+  try {
+    const response = await fetch('https://movethera.com/wp-json/wp/v2/posts?per_page=100&orderby=date&order=desc')
+    if (!response.ok) throw new Error('No s\'ha pogut connectar amb Movethera')
+    const posts = await response.json()
+
+    return posts.map(post => ({
+      id: `movethera-${post.id}`,
+      title: post.title?.rendered || post.title || '',
+      excerpt: post.excerpt?.rendered?.replace(/<[^>]*>/g, '').substring(0, 200) || '',
+      cover_url: post.featured_media_url || null,
+      original_author: post.author_name || 'Movethera',
+      source_url: post.link,
+      published_at: post.date_gmt,
+      body: post.content?.rendered || '',
+      source_type: 'movethera',
+    }))
+  } catch (error) {
+    console.error('Error fetching Movethera articles:', error)
+    return []
+  }
+}
+
+// Importar un artículo extern com a esborrany (DRAFT)
+export const importExternalArticle = async (externalArticle, authorId) => {
+  const baseSlug = slugify(externalArticle.title)
+  const slug = await ensureUniqueSlug(baseSlug)
+
+  const { data, error } = await supabase
+    .from(TABLE)
+    .insert({
+      title: externalArticle.title,
+      slug,
+      excerpt: externalArticle.excerpt || null,
+      body: externalArticle.body || '',
+      cover_url: externalArticle.cover_url || null,
+      original_author: externalArticle.original_author || 'Font externa',
+      source_url: externalArticle.source_url || null,
+      published: false, // Sempre com a DRAFT
+      published_at: null,
+      author_id: authorId || null,
+    })
+    .select(LIST_FIELDS)
+    .single()
+
+  if (error) throw mapError('No s\'ha pogut importar l\'article', error)
+  return data
+}
