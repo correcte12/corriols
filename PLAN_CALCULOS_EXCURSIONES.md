@@ -158,3 +158,12 @@ En cada tarjeta de "Evolció per sortida" se muestran:
 
 **✓ Implementación completada**
 
+---
+
+## Actualización 2026-09-07
+
+- **Variante 1 rediseñada**: pasa de "Deuta de Quilòmetres" (deuda por pasajeros) a un **contador puro de km conducidos** — cada conductor suma `+km` de la salida (sin dividir entre conductores ni descontar pasajeros); los pasajeros no puntúan. Ver fórmula actualizada en `SPEC.md` y `documentation/features.md`. Variante 2 (Consumo de Plazas) no cambia.
+- **Resum y Comparativa unificados**: `calcularSaldos_V1`/`calcularSaldos_V2` (usadas en Resum) dejan de recalcular en vivo desde `conductors`/`passatgers`/`km` y pasan a sumar el `subtotal_variant1`/`subtotal_variant2` guardado de cada excursión — la misma fuente que ya usaba `calcularSaldosHastaFecha` (Comparativa). Antes divergían en cuanto se editaba un delta a mano desde "Editar"; ahora una edición manual se refleja igual en las dos pestañas.
+- `designarConductors()` ahora depende de la variante activa: en V2 sugiere a quien tiene el saldo más alto (deuda), en V1 al que menos km ha conducido.
+- Se recalcularon las 48 excursiones históricas de `grup_excursions.subtotal_variant1` con la fórmula nueva (vía SQL directo en Supabase, fuera de la app).
+

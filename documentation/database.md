@@ -99,6 +99,11 @@ Sortides del grup de dijous. Gestió de rotació de vehicles.
 | `conductors` | text[] | Array d'IDs d'usuari (hardcodejats) |
 | `passatgers` | text[] | Array d'IDs d'usuari |
 | `notes` | text | Comentaris opcionals |
+| `hayOtroConductor` | boolean | Afegit migració 012 — hi ha un conductor esporàdic no registrat |
+| `pasajerosPorOtroConductor` | integer | Afegit migració 012 — passatgers portats pel conductor esporàdic |
+| `subtotal_variant1` | jsonb | Afegit migració 012 — delta de la variant "Km conduïts" (canviada 2026-09-07; abans "Deuta de quilòmetres") |
+| `subtotal_variant2` | jsonb | Afegit migració 012 — delta de la variant "Consumo de plazas" |
+| `subtotal_variant3` | jsonb | Afegit migració 012 — llegat de la Variante 3 (eliminada); ja no es genera en registres nous |
 | `created_at` | timestamptz | |
 
 ---
@@ -146,6 +151,9 @@ Afegeix `pdf_url text` per guardar la URL signada del PDF de documentació de la
 Crea la taula per al seguiment de sortides del grup de dijous.
 Camps: `id`, `data`, `destino`, `km`, `conductors` (text[]), `passatgers` (text[]), `notes`, `created_at`.
 RLS: lectura, inserció, actualització i eliminació obertes (autenticació gestionada a nivell d'app).
+
+### 012 — Camps de conductor esporàdic i subtotals de càlcul
+Afegeix `hayOtroConductor`, `pasajerosPorOtroConductor` i els tres camps `subtotal_variant1/2/3 jsonb` a `grup_excursions` per guardar el delta de cada variant de càlcul per sortida. Variante 3 s'ha eliminat posteriorment del codi (queda com a camp llegat).
 
 ### 010 — Camp `email` a `profiles`
 Afegeix `email text` a `profiles`. Actualitza el trigger `handle_new_user` per guardar l'email en el registre.

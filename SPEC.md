@@ -177,54 +177,41 @@ Seguiment de rotació de vehicles per al grup d'excursionisme. Persistència a S
 
 IDs: `carlosm`, `carlosj`, `antonio`, `diego`, `luisp`, `juanitog`
 
-### Models de saldos — 3 variantes de càlcul
+### Models de saldos — 2 variantes de càlcul (actualitzat 2026-09-07)
 
-Cada excursió es calcula amb **3 mètodes diferents** per poder comparar quins és més just. Els subtotals de les 3 variantes es guarden automàticament en cada registre.
+Cada excursió guarda el **delta** (canvi) de cada variant en `subtotal_variant1`/`subtotal_variant2`. Els saldos globals (pestanya Resum) i els acumulats per sortida (pestanya Comparativa) sumen sempre aquests valors guardats — **mai es recalculen en viu** — perquè una edició manual del delta (botó "Editar" a Comparativa) es reflecteixi igual a totes dues vistes. `subtotal_variant3` (Variante 3, eliminada) ja no es genera; només sobreviu com a camp llegat en registres antics.
 
-#### **Variante 1: Deuta de quilòmetres** (actual)
+#### **Variante 1: Km conduïts** (canviat 2026-09-07 — abans "Deuta de quilòmetres")
 
-Sistema matemàticament just basat en "lo que regalas vs. lo que recibes":
+Comptador pur de km conduïts, sense tenir en compte els passatgers:
 
-- **Conductor suma:** `-(km × nº_passatgers)` → els km que "regala"
-- **Passatger suma:** `+km` → els km que "rep"
-- **No participant:** `0`
+- **Conductor suma:** `+km` (íntegres, sense dividir entre conductors) — els km que ha conduït en aquesta sortida
+- **Passatger:** no puntua (`0`)
 
 **Exemple: sortida 100 km amb 4 persones (1 conductor, 3 passatgers)**
-- Juan (conductor): `-300` (regala 100 km a 3 persones)
-- Ana, Luis, Tú (passatgers): `+100` cada un (reben transport)
-- **Total:** -300 + 100 + 100 + 100 = 0 ✓
+- Juan (conductor): `+100`
+- Ana, Luis, Tú (passatgers): `0` cada un
 
-#### **Variante 2: Consumo de plazas**
+No és un balanç de deute (no compensa amb els passatgers): saldo alt = ha conduït molts km, saldo 0 = no ha conduït mai.
 
-Enfocada al concepte de "consumo de recursos":
+#### **Variante 2: Consumo de plazas** (sense canvis)
 
-- **Conductor suma:** `-(km × nº_passatgers_nets)` → lo que "aporta"
+- **Conductor suma:** `-(km × nº_passatgers_nets / nº_conductors)` → lo que "aporta" (dividit equitativament si hi ha diversos conductors; resta els passatgers del conductor esporàdic si n'hi ha)
 - **Passatger suma:** `+km` → lo que "consume"
 - **No participant:** `0`
 
-Fórmula idèntica a V1 conceptualment; la diferència és el marc d'interpretació (consumo vs. deuta).
-
-#### **Variante 3: Consumo + Ratio de asistencia**
-
-Variante 2 ajustada per penalitzar (o equilibrar) qui assisteix esporàdicament:
-
-1. Calcula saldos amb **Variante 2**
-2. Calcula ratio asistència: `ratio = asistències / total_excursions`
-3. Factor multiplicador: `factor = (100 - (ratio × 100)) / 100`
-4. **Saldo final:** `saldo_v2 × factor`
-
-**Exemple:** 15 de 20 excursions = 75% asistència
-- Factor = (100 - 75) / 100 = 0.25
-- Si V2 dona +200 → V3 = 200 × 0.25 = +50
-
 **Interpretació:**
-- `Saldo > 0`: ha viajat més sense conduir → **ha de posar cotxe**
+- `Saldo > 0`: ha viatjat més sense conduir → **ha de posar cotxe**
 - `Saldo < 0`: ha conduït més → **ja ha pagat**
 - `Saldo = 0`: equilibrat
 
 ### Designació de conductors
 
-Els **2 conductors suggerits** són els amb **saldo positiu més alt** del mètode seleccionat (els que més quilòmetres han "regalat"). Els saldos recalculen automàticament quan canvies de variante.
+Els **2 conductors suggerits** depenen de la variant activa:
+- **V2 (deute):** els amb **saldo positiu més alt** (els que més quilòmetres han "regalat").
+- **V1 (km purs):** els amb **saldo més baix** (els que menys km han conduït).
+
+Els saldos i la selecció recalculen automàticament quan canvies de variante.
 
 ### Conductor esporádic (opcional)
 
@@ -246,16 +233,15 @@ Els passatgers portats pel conductor esporádic **no afecten el saldo** dels con
   "hayOtroConductor": false,
   "pasajerosPorOtroConductor": null,
   "notes": "Bon temps",
-  "subtotal_variant1": {"carlosm": -300, "carlosj": -300, "antonio": 150, "diego": 150, ...},
-  "subtotal_variant2": {"carlosm": -300, "carlosj": -300, "antonio": 150, "diego": 150, ...},
-  "subtotal_variant3": {"carlosm": -75, "carlosj": -75, "antonio": 37.5, "diego": 37.5, ...}
+  "subtotal_variant1": {"carlosm": 180, "carlosj": 0, "antonio": 0, "diego": 0, ...},
+  "subtotal_variant2": {"carlosm": -300, "carlosj": -300, "antonio": 150, "diego": 150, ...}
 }
 ```
 
 ### Vista del Dashboard
 
-- **Pestaña "Resum":** Selector radio de variante (V1/V2/V3) + taula de saldos actuals + segereix 2 conductors + últimes 5 sortides
-- **Pestaña "Comparativa":** Taula 3×n amb saldo de cada usuari en cada variante + evolució per sortida
+- **Pestaña "Resum":** Selector radio de variante (V1/V2) + taula de saldos actuals (suma de tots els `subtotal_variant1/2` guardats) + suggereix 2 conductors + últimes 5 sortides
+- **Pestaña "Comparativa":** Taula 2×n amb saldo de cada usuari en cada variante + evolució per sortida (delta + acumulat de cada excursió, calculat sumant els deltes guardats en ordre de `data`)
 - **Pestaña "Explicació":** Documentació interactiva de cada mètode amb exemples
 
 ### Importació de dades

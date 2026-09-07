@@ -160,16 +160,19 @@ Secció independent per fer el seguiment de la rotació de vehicles del grup de 
 - Sessió guardada a `sessionStorage` (no usa Supabase Auth)
 - Usuaris: Carlos M. (4 places), Carlos J. (4), Antonio (4), Diego (4), Luis P. (3), Juanito G. (4)
 
-### Lògica de saldos (km·passatger)
-- Cada sortida registra conductors i passatgers
-- El conductor "gasta" capacitat·km; el passatger "deu" km
-- `calcularSaldos()` acumula el balanç per a cada usuari
-- `designarConductors()` suggereix els 2 amb el saldo més negatiu per a la propera sortida
+### Lògica de saldos — 2 variants (actualitzat 2026-09-07)
+- Cada sortida registra conductors i passatgers, i guarda el delta de cada variant a `subtotal_variant1`/`subtotal_variant2`
+- **V1 (Km conduïts):** cada conductor suma `+km`; els passatgers no puntuen
+- **V2 (Consumo de plazas):** conductor `-(km × passatgers/conductors)`, passatger `+km` (balanç de deute)
+- `calcularSaldos_V1/V2()` sumen sempre els deltes **guardats** (mai recalculen en viu), perquè una edició manual es reflecteixi igual a Resum i Comparativa
+- `designarConductors()` suggereix, segons la variant activa: en V2 els 2 amb saldo més alt (han "regalat" més km); en V1 els 2 amb saldo més baix (han conduït menys)
 
 ### Pestanyes
-- **Dashboard**: saldos actuals de tots els usuaris (ressaltat el propi), conductors suggerits per la pròxima sortida, últimes 5 sortides
+- **Resum**: selector de variant (V1/V2), saldos actuals de tots els usuaris (ressaltat el propi), conductors suggerits per la pròxima sortida, últimes 5 sortides
 - **Nova sortida**: formulari amb data, destí, km i toggle conductor/passatger per a cada usuari
 - **Historial**: llista completa de sortides amb edició inline (botó ✎) i eliminació amb confirmació
+- **Comparativa**: taula amb saldo de cada usuari en V1 i V2 + evolució per sortida (delta i acumulat)
+- **Explicació**: documentació interactiva de cada variant amb exemples
 
 ### Infraestructura
 - Taula Supabase: `grup_excursions` (migració 011)
