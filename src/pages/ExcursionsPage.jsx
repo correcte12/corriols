@@ -72,36 +72,16 @@ async function updateExcursion(id, fields, allExcursionsForContext = []) {
 // ─── Lògica de saldos (3 variantes) ───────────────────────────────────────────
 
 // VARIANTE 1: Deuta de Quilòmetres (actual)
-// - Conductor: -(km × pasajeros_por_conductor)
-// - Passatger: +km
+// Suma el subtotal_variant1 guardado de cada excursión (única fuente de
+// verdad, compartida con calcularSaldosHastaFecha) para que una edición
+// manual del delta se refleje también en el resumen global.
 function calcularSaldos_V1(excursions) {
   const saldos = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
 
   for (const exc of excursions) {
-    const conductors = exc.conductors ?? []
-    const passatgers = exc.passatgers ?? []
-    const km         = parseFloat(exc.km) || 0
-    let nPasajeros  = passatgers.length
-
-    if (conductors.length === 0) continue
-
-    // Si hay conductor esporádico, restar del total de pasajeros
-    if (exc.hayOtroConductor && exc.pasajerosPorOtroConductor) {
-      nPasajeros -= parseInt(exc.pasajerosPorOtroConductor)
-    }
-
-    // Dividir pasajeros equitativamente entre conductores
-    const nConductores = conductors.length || 1
-    const pasajerosPorConductor = nPasajeros / nConductores
-
-    // Conductors resten: -(km × pasajeros_por_conductor)
-    for (const cid of conductors) {
-      if (saldos[cid] !== undefined) saldos[cid] -= km * pasajerosPorConductor
-    }
-
-    // Passatgers sumen: +km
-    for (const uid of passatgers) {
-      if (saldos[uid] !== undefined) saldos[uid] += km
+    if (!exc.subtotal_variant1) continue
+    for (const [uid, delta] of Object.entries(exc.subtotal_variant1)) {
+      if (saldos[uid] !== undefined) saldos[uid] += Number(delta) || 0
     }
   }
 
@@ -109,36 +89,14 @@ function calcularSaldos_V1(excursions) {
 }
 
 // VARIANTE 2: Consumo de Plazas
-// - Conductor: -(km × pasajeros_por_conductor)
-// - Passatger: +km
+// Misma lógica que V1: suma el subtotal_variant2 guardado de cada excursión.
 function calcularSaldos_V2(excursions) {
   const saldos = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
 
   for (const exc of excursions) {
-    const conductors = exc.conductors ?? []
-    const passatgers = exc.passatgers ?? []
-    const km         = parseFloat(exc.km) || 0
-    let nPasajeros  = passatgers.length
-
-    if (conductors.length === 0) continue
-
-    // Si hay conductor esporádico, restar del total de pasajeros
-    if (exc.hayOtroConductor && exc.pasajerosPorOtroConductor) {
-      nPasajeros -= parseInt(exc.pasajerosPorOtroConductor)
-    }
-
-    // Dividir pasajeros equitativamente entre conductores
-    const nConductores = conductors.length || 1
-    const pasajerosPorConductor = nPasajeros / nConductores
-
-    // Conductors resten: -(km × pasajeros_por_conductor)
-    for (const cid of conductors) {
-      if (saldos[cid] !== undefined) saldos[cid] -= km * pasajerosPorConductor
-    }
-
-    // Passatgers sumen: +km
-    for (const uid of passatgers) {
-      if (saldos[uid] !== undefined) saldos[uid] += km
+    if (!exc.subtotal_variant2) continue
+    for (const [uid, delta] of Object.entries(exc.subtotal_variant2)) {
+      if (saldos[uid] !== undefined) saldos[uid] += Number(delta) || 0
     }
   }
 
@@ -177,30 +135,17 @@ function calcularSaldosHastaFecha(excursions, fechaLimite) {
 }
 
 // Calcular el delta (cambio) de una excursión específica en V1
+// Puros km conducidos: cada conductor suma en positivo el km de la salida
+// (sin dividir entre conductores ni tener en cuenta pasajeros). Los
+// pasajeros no puntúan en V1.
 function calcularDeltaV1(excursion) {
   const delta = Object.fromEntries(USUARIOS.map(u => [u.id, 0]))
 
   const conductors = excursion.conductors ?? []
-  const passatgers = excursion.passatgers ?? []
   const km = parseFloat(excursion.km) || 0
-  let nPasajeros = passatgers.length
 
-  if (conductors.length === 0) return delta
-
-  if (excursion.hayOtroConductor && excursion.pasajerosPorOtroConductor) {
-    nPasajeros -= parseInt(excursion.pasajerosPorOtroConductor)
-  }
-
-  // Dividir pasajeros equitativamente entre conductores
-  const nConductores = conductors.length || 1
-  const pasajerosPorConductor = nPasajeros / nConductores
-
-  // Conductors resten: -(km × pasajeros_por_conductor)
   for (const cid of conductors) {
-    if (delta[cid] !== undefined) delta[cid] -= km * pasajerosPorConductor
-  }
-  for (const uid of passatgers) {
-    if (delta[uid] !== undefined) delta[uid] += km
+    if (delta[cid] !== undefined) delta[cid] += km
   }
 
   return delta
@@ -278,18 +223,18 @@ function calcularRatios(saldos, asistencies) {
   )
 }
 
-function designarConductors(saldos, asistencies, numConductors = 2) {
-  // Els que tienen saldo positiu más alto (més quilòmetres "regalats") han de conduir
-  return USUARIOS
-    .slice()
-    .sort((a, b) => saldos[b.id] - saldos[a.id])
-    .slice(0, numConductors)
-    .map(u => u.id)
+function designarConductors(saldos, asistencies, numConductors = 2, variant = 'v2') {
+  // V2 (deute): saldo positiu alt = ha viatjat sense conduir → li toca conduir.
+  // V1 (km purs): saldo alt = ja ha conduït molt → li toca conduir a qui en té MENYS.
+  const ordered = USUARIOS.slice().sort((a, b) =>
+    variant === 'v1' ? saldos[a.id] - saldos[b.id] : saldos[b.id] - saldos[a.id]
+  )
+  return ordered.slice(0, numConductors).map(u => u.id)
 }
 
 // ─── Vistes ───────────────────────────────────────────────────────────────────
 function Dashboard({ excursions, saldos, asistencies, ratios, currentUser, variant, onVariantChange }) {
-  const suggested = designarConductors(saldos, asistencies, 2)
+  const suggested = designarConductors(saldos, asistencies, 2, variant)
 
   const variantLabels = {
     v1: 'Variante 1: Deuta de Quilòmetres',
@@ -324,7 +269,9 @@ function Dashboard({ excursions, saldos, asistencies, ratios, currentUser, varia
                 {s > 0 ? '+' : ''}{s.toFixed(0)} km
               </span>
               <span style={{ fontSize: '0.7rem', color: 'var(--exc-muted)', marginTop: 2 }}>
-                {n} sortides {s > 0 ? '(ha de conduir)' : s < 0 ? '(ha conduït)' : '(equilibrat)'}
+                {n} sortides {variant === 'v1'
+                  ? (s > 0 ? '(km conduïts)' : '(no ha conduït)')
+                  : (s > 0 ? '(ha de conduir)' : s < 0 ? '(ha conduït)' : '(equilibrat)')}
               </span>
             </div>
           )
@@ -336,7 +283,9 @@ function Dashboard({ excursions, saldos, asistencies, ratios, currentUser, varia
         {suggested.map(uid => (
           <span key={uid} className="exc-suggested-badge">{USER_MAP[uid]?.nombre}</span>
         ))}
-        <span className="exc-suggested-hint">(saldo més alt = més quilòmetres "regalats")</span>
+        <span className="exc-suggested-hint">
+          {variant === 'v1' ? '(saldo més baix = menys km conduïts)' : '(saldo més alt = més quilòmetres "regalats")'}
+        </span>
       </div>
 
       <div className="exc-section-title" style={{ marginTop: '2rem' }}>
@@ -961,19 +910,18 @@ function Explicacio() {
             <strong>Fórmula:</strong>
           </p>
           <ul style={{ margin: '0.5rem 0 0.5rem 1.5rem', padding: 0, fontSize: '0.95rem', lineHeight: 1.6, color: 'var(--exc-muted)' }}>
-            <li><strong>Conductor:</strong> −(km × nº passatgers) = lo que "regala"</li>
-            <li><strong>Passatger:</strong> +km = lo que "recibe"</li>
+            <li><strong>Conductor:</strong> +km = els km que ha conduït en aquesta sortida (sense dividir entre conductors ni tenir en compte els passatgers)</li>
+            <li><strong>Passatger:</strong> no puntua (0)</li>
           </ul>
           <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
             <strong>Exemple:</strong> Sortida 100 km, 4 persones (1 conductor + 3 passatgers)
           </p>
           <ul style={{ margin: '0.5rem 0 0 1.5rem', padding: 0, fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
-            <li>Juan (conductor): −100 × 3 = <strong>−300</strong></li>
-            <li>Ana, Luis, Tú (passatgers): +100 = <strong>+100</strong> cada un</li>
-            <li>Total: −300 + 100 + 100 + 100 = <strong>0</strong> ✓</li>
+            <li>Juan (conductor): <strong>+100</strong></li>
+            <li>Ana, Luis, Tú (passatgers): <strong>0</strong> cada un</li>
           </ul>
           <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: 'var(--exc-muted)' }}>
-            <strong>Interpretació:</strong> Positiu = ha viatjat sense conduir (ha de posar coche) | Negatiu = ha conduït més (ja ha pagat)
+            <strong>Interpretació:</strong> és un comptador pur de km conduïts — saldo alt = ha conduït molts km, saldo 0 = no ha conduït mai. No és un balanç de deute (no compensa amb els passatgers).
           </p>
         </div>
       </div>
